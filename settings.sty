@@ -1,0 +1,112 @@
+\ProvidesPackage{settings}
+
+% -------------------- Variable changes section (0) --------------------
+\newcommand{\veq}{\mathrel{\rotatebox{90}{$=$}}}
+
+\newcommand{\join}{\bowtie}
+\newcommand{\semijoin}{\ltimes}
+\newcommand{\leftouterjoin}{\tiny \textifsym{d|><|}}
+\newcommand{\rightouterjoin}{\tiny \textifsym{|><|d}}
+\newcommand{\fullouterjoin}{\tiny \textifsym{d|><|d}}
+
+% -------------------- Library section (1) --------------------
+\usepackage{adjustbox}                      % Scale tables...
+\usepackage{amssymb}                        % Add more math symbol (join and other join)
+\usepackage{arydshln}                       % Dashed line (in tabular)
+\usepackage{boldline}
+\usepackage{changepage}                     % Set custom margin
+\usepackage[framemethod=tikz]{mdframed}     % Draw border
+\usepackage{ifsym}                          % Used with amssymb
+\usepackage{mips}
+\usepackage{multirow, makecell}             % Allow to use multiple row cell
+\usepackage{nicefrac}                       % Better fraction view
+\usepackage{pifont}                         % Add checkmark and cross symbol
+\usepackage{tikz}                           % Add tree structure drawing
+
+% -------------------- Settings section (2) --------------------
+\definecolor{customcolor}{RGB}{38, 116, 146}
+
+\usetikzlibrary{shapes,arrows}
+
+\tikzset{
+    myarrow/.style={
+        draw,
+        fill=none,
+        single arrow,
+        minimum height=1.5cm,
+        line width=1pt,
+        color=customcolor,
+        single arrow head extend=0.1ex
+    }
+}
+
+\newcommand{\arrowup}{%
+    \tikz [baseline=-0.5ex]{\node [myarrow,rotate=90, single arrow head extend=2mm,inner sep=.1mm] {};}% or: single arrow head indent=⟨length⟩
+}
+
+\newcommand{\arrowdown}{%
+    \tikz [baseline=-1ex]{\node [myarrow,rotate=-90,  yscale=.75, single arrow head extend=2.5mm] {};}
+}
+
+\usetikzlibrary{calc,patterns}
+
+\tikzset{
+    slope/.store in=\slope,
+%    patternkolor/.store in=\patterncolor,% with the next line changed to:
+                                          % pattern color/.append style={patternkolor=#1}
+    pattern color/.append code={\def\patterncolor{#1}}
+}
+
+\newcommand{\theslope}{0.7}
+
+\pgfdeclarepatternformonly{diagonal lines}
+{\pgfpoint{-.1mm/\theslope}{-.1mm}}{\pgfpoint{1.1mm/\theslope}{1.1mm}}
+{\pgfpoint{1mm/\theslope}{1mm}}
+{
+    \pgfsetlinewidth{0.4pt}
+    \pgfpathmoveto{\pgfpoint{-.1mm/\theslope}{-.1mm}}
+    \pgfpathlineto{\pgfpoint{1.1mm/\theslope}{1.1mm}}
+    \pgfusepath{stroke}
+}
+
+\pgfdeclarepatternformonly[\slope,\patterncolor]{slant lines}
+{\pgfpoint{-.1mm/\slope}{-.1mm}}{\pgfpoint{1.1mm/\slope}{1.1mm}}
+{\pgfpoint{1mm/\slope}{1mm}}
+{
+    \pgfsetlinewidth{0.4pt}
+    \pgfpathmoveto{\pgfpoint{-.1mm/\slope}{-.1mm}}
+    \pgfpathlineto{\pgfpoint{1.1mm/\slope}{1.1mm}}
+    \pgfsetstrokecolor{\patterncolor}
+    \pgfusepath{stroke}
+}
+
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+\lstset{ %
+  language=[mips]Assembler,             % the language of the code
+  basicstyle=\small\ttfamily,           % the size of the fonts that are used for the code
+  numbers=left,                         % where to put the line-numbers
+  numberstyle=\tiny\color{black},       % the style that is used for the line-numbers
+  stepnumber=1,                         % the step between two line-numbers. If it's 1, each line
+                                        % will be numbered
+  numbersep=5pt,                        % how far the line-numbers are from the code
+  backgroundcolor=\color{white},        % choose the background color. You must add \usepackage{color}
+  showspaces=false,                     % show spaces adding particular underscores
+  showstringspaces=false,               % underline spaces within strings
+  showtabs=false,                       % show tabs within strings adding particular underscores
+  frame=single,                         % adds a frame around the code
+  rulecolor=\color{gray},              % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. commens (green here))
+  tabsize=4,                            % sets default tabsize to 2 spaces
+  captionpos=none,                      % sets the caption-position to bottom
+  breaklines=true,                      % sets automatic line breaking
+  breakatwhitespace=false,              % sets if automatic breaks should only happen at whitespace
+  title=\lstname,                       % show the filename of files included with \lstinputlisting;
+                                        % also try caption instead of title
+  keywordstyle=[1]\color{blue}\bfseries,   % keyword style
+  keywordstyle=[2]\color{red}\bfseries,   % keyword style
+  keywordstyle=[3]\color{red}\bfseries,   % keyword style
+  commentstyle=\color{gray},            % comment style
+  stringstyle=\color{red},              % string literal style
+  escapeinside={\%*}{*)},               % if you want to add a comment within your code
+}

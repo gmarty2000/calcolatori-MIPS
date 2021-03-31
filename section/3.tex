@@ -1,0 +1,319 @@
+% Lezione del 29/03/2021
+
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\section{Codifica delle costanti}
+Poiché l'istruzione che contiene un immediato lo codifica
+su 16 bit, come si fa a lavorare con 32 bit?
+\\[2mm]
+\textbf{Esempio} \\
+Voglio caricare nel registro \texttt{\$s0} il contenuto di una costante
+(è un numero). È su 16 o 32 bit?
+\\[1mm]
+\begin{itemize}
+    \vspace*{-3mm}
+    \item se è su 16 bit questa operazione si fa con una normale istruzione
+    di \texttt{addi}:
+    \\[1mm]
+    \begin{tabular}{ p{9cm} p{7cm} }
+        \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+        \texttt{// int è una word a 32 bit (con segno)} & \texttt{\# \$s0 = a} \\
+        \texttt{a = 0x4f3c;} & \texttt{addi \$s0, \$0, 0x4f3c} \\
+    \end{tabular}
+    \\[1mm]
+    \underline{\texttt{Estensione del segno, 16 $\rightarrow$ 32 bit}}
+    \vspace*{3mm}
+    \item se è su 32 bit si usano la \texttt{lui} e la \texttt{ori}:
+    \begin{enumerate}
+        \item si "spezza" la \texttt{word} da 32 bit in 2 parti (alta
+        e bassa) da 16 bit
+        \item si prende la parte alta e si esegue la \texttt{lui}
+        in un registro
+        \item si prende la parte bassa e si esegue la \texttt{ori}
+        tra il registro dove ho salvato la parte alta ed il valore della
+        parte bassa salvando il risultato nello stesso registro di partenza
+    \end{enumerate}
+    \vspace*{1mm}
+    \begin{tabular}{ p{9cm} p{7cm} }
+        \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+        \texttt{// int è una word a 32 bit (con segno)} & \texttt{\# \$s0 = a} \\
+        \texttt{a = 0xFEDC8765;} & \texttt{lui \$s0, 0xFEDC} \\
+        & \texttt{ori \$s0, \$s0, 0x8765} \\
+    \end{tabular}
+\end{itemize}
+
+\vspace*{1mm}
+
+\noindent
+\underline{\textbf{Nota bene}: queste istruzioni sono di tipo I in quanto
+sono presenti dei valori immediati (la \texttt{lui} ha un} \\
+\underline{registro sorgente non utilizzato, posto a 0).}
+
+\section{Moltiplicazione e divisione}
+Le istruzioni di moltiplicazione e divisione utilizzano 2
+registri particolari (aggiuntivi, fuori dalla categoria dei
+32 registri): \texttt{lo}, \texttt{hi}. \\
+Sono dei registri interni su cui noi non abbiamo modo di agire a meno
+che si utilizzino determinate istruzioni.
+
+\begin{table}[h!]
+    \hspace*{1cm}
+    \begin{minipage}{\linewidth}
+        \subsection*{Moltiplicazione}
+        La moltiplicazione di 2 numeri a 32 bit può creare un problema
+        di overflow ovvero potrebbe non essere possibile
+        rappresentare il dato su 32 bit. \\
+        Per tutelarsi, MIPS restituisce un risultato a 64 bit. \\
+        \hspace*{4mm} \texttt{mult \$s0, \$s1 \hspace*{0cm} \# risultato contenuto
+        in \{hi, lo\}, registri a 32 bit} \\
+        La parte alta del risultato viene salvata in \texttt{hi} e la parte bassa
+        in \texttt{lo}.
+    \end{minipage}
+
+    \vspace*{5mm}
+
+    \hspace*{1cm}
+    \begin{minipage}{\linewidth}
+        \subsection*{Divisione}
+        La divisione di due numeri a 32 bit memorizza:
+        \begin{itemize}
+            \item il quoziente nel registro \texttt{lo}
+            \item il resto nel registro \texttt{hi}
+        \end{itemize}
+    \end{minipage}
+\end{table}
+
+\noindent
+Per ottenere i valori contenuti nei registri esistono 2
+istruzioni specifiche:
+\begin{itemize}
+    \item la ''\textit{move from lo}" (\texttt{mflo}) che copia il valore
+    del registro \texttt{lo} nel registro passato tramite parametro
+    \item la ''\textit{move from hi}" (\texttt{mfhi}) che copia il valore
+    del registro \texttt{hi} nel registro passato tramite parametro
+\end{itemize}
+
+\vspace*{2mm}
+
+\noindent
+\underline{\textbf{Nota bene}: queste istruzioni sono di tipo R in quanto
+non sono presenti dei valori immediati.}
+
+\subsection*{Esempio}
+\texttt{mult \$s0, \$s1 \# risultato -> parte alta in 'hi', parte bassa in 'lo'} \\
+\texttt{div \hspace*{0cm} \$s0, \$s1 \# risultato -> quoziente in 'lo', resto in 'hi'}\\
+\\
+\texttt{mflo \$s2 \# copia il contenuto del registro 'lo' nel registro 's2'} \\
+\texttt{mfhi \$s3 \# copia il contenuto del registro 'hi' nel registro 's3'}
+
+\newpage
+
+\chapter{Pseudoistruzioni}
+Le pseudoistruzioni (anche chiamate macroistruzioni) sono istruzioni
+che vengono codificate in una o più istruzioni macchina (a differenza
+delle normali istruzioni MIPS). \\
+\underline{Sono state create per rendere i programmi più leggibili.}
+
+\section{Load immediate}
+La ''\textit{load immediate}" (\texttt{li}) è una pseudoistruzione
+(non è un'istruzione MIPS e quindi non si può identificare in una
+tipologia di istruzioni).
+\\[2mm]
+\textbf{Esempio} \\
+\texttt{li \$t0, 4} viene tradotta in \texttt{ori \$t0, \$0, 4}
+\\[2mm]
+\textbf{Esempio} \\
+Se ho dei numeri da 64 bit, per esempio:
+
+\begin{center}
+    \setlength{\tabcolsep}{30pt}
+    \begin{tabular}{ c | c }
+        \texttt{li \$t0, 90000} & \texttt{li \$t0, -5} \\
+    \end{tabular}
+\end{center}
+
+\noindent
+vengono tradotti in un altro modo. \\
+\texttt{li \$t0, 90000}, per esempio, viene tradotta in \\
+\texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lui \textbf{\$at}, 1 \# carica la parte superiore (uguale a 65536 (2$^\text{16}$))} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} ori \$t0, \textbf{\$at}, 24464 \# carica la parte inferiore (per arrivare a 90000)}
+\\[1mm]
+\underline{\textbf{Nota bene}: il registro \texttt{\textbf{\$at}} viene usato solamente per le pseudoistruzioni.}
+
+\section{Load address}
+La ''\textit{load address}" (\texttt{la}) è una pseudoistruzione
+(non è un'istruzione MIPS e quindi non si può identificare in una
+tipologia di istruzioni).
+\\[2mm]
+\textbf{Esempio} \\
+\texttt{la \$t0, label} viene tradotta in \\
+\texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lui \textbf{\$at}, n \# load upper 16 bits of label} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} ori \$t0, \textbf{\$at}, m \# lower 16 bits of label}
+
+\section{Altre pseudoistruzioni}
+La moltiplicazione (\texttt{mul}) e la divisione sono delle macroistruzioni
+in quanto si basano su più istruzioni.
+\begin{table}[h!]
+    % \setlength{\tabcolsep}{0pt}
+    \begin{tabular}{ p{3.5cm} p{3.5cm} p{3.5cm} p{6mm} p{3.5cm} }
+        \multicolumn{2}{ c }{\hspace*{-1cm} \textbf{Moltiplicazione}} & \multicolumn{3}{ c }{\hspace*{-1cm} \textbf{Divisione}} \\
+        \multirow{4}{*}{\texttt{mul rd, rs, rt}} & & \multirow{4}{*}{\texttt{div rd, rs, rt}} & & \texttt{bne rt, \$0, ok} \\
+        & \texttt{mult rs, rt} & & & \texttt{break \$0} \\
+        & \texttt{mflo rd} & & \texttt{ok:} & \texttt{div rs, rt} \\
+        & & & & \texttt{mflo rd}
+    \end{tabular}
+\end{table}
+
+\noindent
+\underline{\textbf{Nota bene}: la \texttt{mul} si utilizza solamente se
+siamo sicuri che il risultato sia su 32 bit.}
+
+\newpage
+
+\section*{Esempio}
+Il seguente esercizio serve per calcolare il volume e l'area di un
+parallelepipedo. Le formule sono le seguenti:
+
+\texttt{volume = aSide $\cdot$ bSide $\cdot$ cSide}
+
+\texttt{surfaceArea = 2 $\cdot$ (aSide $\cdot$ bSide + aSide $\cdot$ cSide + bSide $\cdot$ cSide)}
+
+\vspace*{2mm}
+
+\noindent
+\textbf{Codice} \\
+\lstinputlisting{example/3.0_parallelepipedo.asm}
+
+\newpage
+
+\chapter{Controllo del flusso}
+Le seguenti istruzioni servono per fare i salti e permettono
+di definire un controllo del flusso all'interno del codice.
+I salti possono essere di diverso tipo:
+\begin{itemize}
+    \item condizionali
+    \item incondizionali
+\end{itemize}
+
+\noindent
+TODO: rivedere
+\noindent
+\textbf{Codice MIPS assembly} \\
+\texttt{addi \$s0, \$0, 4           \# \$s0 = 0 + 4 = 4} \\
+\texttt{addi \$s1, \$0, 1           \# \$s1 = 0 + 1 = 1} \\
+\texttt{sll \$s1, \$s1, 2           \# \$s1 = 1 $<<$ 2 = 4} \\
+\texttt{beq \$s0, \$s1, target      \# branch is taken} \\
+\texttt{addi \$s1, \$s1, 1          \# not executed} \\
+\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
+\\
+\texttt{target:                     \# label} \\
+\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 4 + 4 = 8} \\
+
+\noindent
+\textbf{Codice MIPS assembly} \\
+\texttt{addi \$s0, \$0, 4           \# \$s0 = 0 + 4 = 4} \\
+\texttt{addi \$s1, \$0, 1           \# \$s1 = 0 + 1 = 1} \\
+\texttt{sll \$s1, \$s1, 2           \# \$s1 = 1 $<<$ 2 = 4} \\
+\texttt{bne \$s0, \$s1, target      \# branch not taken} \\
+\texttt{addi \$s1, \$s1, 1          \# not executed} \\
+\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
+\\
+\texttt{target:                     \# label} \\
+\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 1 + 4 = 5} \\
+
+\noindent
+\textbf{Codice MIPS assembly} \\
+\texttt{addi \$s0, \$0, 4           \# \$s0 = 4} \\
+\texttt{addi \$s1, \$0, 1           \# \$s1 = 1} \\
+\texttt{j target                    \# jump to target} \\
+\texttt{sra \$s1, \$s1, 2           \# not executed} \\
+\texttt{addi \$s1, \$s1, 1          \# not executed} \\
+\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
+\\
+\texttt{target:} \\
+\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 1 + 4 = 5} \\
+
+\noindent
+\textbf{Codice MIPS assembly} \\
+\begin{table}[h!]
+    \vspace*{-5mm}
+    \setlength{\tabcolsep}{18pt}
+    \begin{tabular}{ l l }
+        \textbf{\texttt{0x00002000}} & \texttt{addi \$s0, \$0, 0x2010} \\
+        \textbf{\texttt{0x00002004}} & \texttt{jr \$s0} \\
+        \textbf{\texttt{0x00002008}} & \texttt{addi \$s1, \$0, 1} \\
+        \textbf{\texttt{0x0000200C}} & \texttt{sra \$s1, \$s1, 2} \\
+        \textbf{\texttt{0x00002010}} & \texttt{lw \$s3, 44(\$s1)} \\
+    \end{tabular}
+\end{table}
+
+\section{Costrutti di alto livello}
+TODO
+
+\subsection{if statement (TODO)}
+\begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
+	\texttt{if (i == j)} & \texttt{\# \$s3 = i, \$s4 = j} \\
+    \texttt{ \hspace*{0cm} f = g + h;} & \texttt{ \hspace*{0cm} bne \$s3, \$s4, L1} \\
+    & \texttt{ \hspace*{0cm} add \$s0, \$s1, \$s2} \\
+    \texttt{f = f $–$ i;} \\
+    & \texttt{L1: sub \$s0, \$s0, \$s3} \\
+\end{tabular}
+
+\noindent
+\begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
+	\texttt{if (i == j)} & \texttt{\# \$s3 = i, \$s4 = j} \\
+    \texttt{ \hspace*{0cm} f = g + h;} & \texttt{ \hspace*{0cm} bne \$s3, \$s4, L1} \\
+    \texttt{else} & \texttt{ \hspace*{0cm} add \$s0, \$s1, \$s2} \\
+    \texttt{ \hspace*{0cm} f = f $–$ i;} & \texttt{ \hspace*{0cm} j done} \\
+    & \texttt{L1: sub \$s0, \$s0, \$s3} \\
+    & \texttt{done:} \\
+\end{tabular}
+
+\noindent
+TODO
+
+\noindent
+\texttt{beq \$s3, \$s4, L2} \\
+\texttt{J L1} \\
+\texttt{L2: add \$s0, \$s1, \$s2} \\
+\texttt{L1: sub \$s0, \$s0, \$s3} \\
+
+\noindent
+\underline{\textbf{Nota bene}: assembly testa i casi negativi (i != j)
+al contrario dell'alto livello (i == j).}
+
+\subsection{Ciclo while}
+TODO
+
+\subsection{Ciclo for}
+TODO
+
+\subsection{Magnitude comparison (TODO)}
+slt - Set on Less Than
+TODO
+TODO
+
+\noindent
+\begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = i, \$s1 = sum} \\
+    \texttt{// add the powers of 2 from 1} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s1, \$0, 0} \\
+    \texttt{// to 100} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s0, \$0, 1} \\
+    \texttt{int sum = 0;} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm}  addi \$t0, \$0, 101} \\
+    \texttt{int i;} & \texttt{loop: slt \$t1, \$s0, \$t0} \\
+    & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} beq \$t1, \$0, done} \\
+    \texttt{for (i = 1; i $<$ 101; i = i * 2) \{} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} add \$s1, \$s1, \$s0} \\
+    \texttt{ \hspace{0cm} sum = sum + i;} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} sll \$s0, \$s0, 1} \\
+    \texttt{\}} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} j loop} \\
+    & \texttt{done:} \\
+\end{tabular}
+
+TODO
+
+\end{document}

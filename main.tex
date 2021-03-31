@@ -1,0 +1,35 @@
+\documentclass[twoside]{book}
+\usepackage[table]{xcolor}
+\usepackage{../settings}
+\usepackage{settings}
+
+\graphicspath{ {./image/} }
+
+% \title{\hspace*{0.25cm} \includegraphics[width=10cm, height=4cm]{header}\\[0.5cm] {\fontfamily{bch}\fontsize{40}{60}\selectfont Calcolatori elettronici}}
+\title{\hspace*{0.25cm} {\fontfamily{bch}\fontsize{40}{60}\selectfont Calcolatori elettronici}}
+\subtitle{Utilizzo del linguaggio Assembly MIPS \vspace*{10cm}}
+\author{\Large Giuseppe Martini}
+\date{}
+
+\begin{document}
+
+\pagenumbering{gobble}
+\maketitle
+\pagenumbering{Roman}
+
+\pagestyle{plain}
+
+\doublespacing
+\tableofcontents
+\singlespacing
+
+\cleardoublepage
+\pagestyle{main}
+
+\pagenumbering{arabic}
+
+\subfile{section/1}
+\subfile{section/2}
+\subfile{section/3}
+
+\end{document}
