@@ -188,7 +188,25 @@ parallelepipedo. Le formule sono le seguenti:
 
 \newpage
 
-\chapter{Controllo del flusso}
+\chapter{Costrutti di alto livello}
+I comuni linguaggi di alto livello hanno istruzioni che mi permettono
+di fare determinate operazioni standard, tra cui:
+\vspace*{-2mm}
+\begin{table}[h!]
+    \centering
+
+    \setlength{\tabcolsep}{18pt}
+    \begin{tabular}{ c c c c c }
+        \texttt{if / else} & \texttt{cicli} & \texttt{vettori / matrici} & \texttt{funzioni} \\
+    \end{tabular}
+\end{table}
+\vspace*{-2mm}
+
+\noindent
+Per creare questi costrutti in MIPS è necessario l'utilizzo
+delle istruzioni di salto.
+
+\section{Controllo del flusso}
 Le seguenti istruzioni servono per fare i salti e permettono
 di definire un controllo del flusso all'interno del codice.
 I salti possono essere di diverso tipo:
@@ -197,50 +215,124 @@ I salti possono essere di diverso tipo:
     \item incondizionali
 \end{itemize}
 
-\noindent
-TODO: rivedere
-\noindent
-\textbf{Codice MIPS assembly} \\
-\texttt{addi \$s0, \$0, 4           \# \$s0 = 0 + 4 = 4} \\
-\texttt{addi \$s1, \$0, 1           \# \$s1 = 0 + 1 = 1} \\
-\texttt{sll \$s1, \$s1, 2           \# \$s1 = 1 $<<$ 2 = 4} \\
-\texttt{beq \$s0, \$s1, target      \# branch is taken} \\
-\texttt{addi \$s1, \$s1, 1          \# not executed} \\
-\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
-\\
-\texttt{target:                     \# label} \\
-\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 4 + 4 = 8} \\
+\vspace{2mm}
 
 \noindent
-\textbf{Codice MIPS assembly} \\
-\texttt{addi \$s0, \$0, 4           \# \$s0 = 0 + 4 = 4} \\
-\texttt{addi \$s1, \$0, 1           \# \$s1 = 0 + 1 = 1} \\
-\texttt{sll \$s1, \$s1, 2           \# \$s1 = 1 $<<$ 2 = 4} \\
-\texttt{bne \$s0, \$s1, target      \# branch not taken} \\
-\texttt{addi \$s1, \$s1, 1          \# not executed} \\
-\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
-\\
-\texttt{target:                     \# label} \\
-\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 1 + 4 = 5} \\
+\underline{Queste istruzioni utilizzano una label, ovvero un identificatore
+che corrisponde ad un indirizzo di codice} \\
+\underline{(posizione di un'istruzione).}
+\\[2mm]
+Se l'istruzione di salto viene eseguita
+\begin{itemize}
+    \item allora vado direttamente al pezzo di codice contrassegnato
+    dalla label e lo eseguo (saltando l'esecuzione del codice precedente)
+    \item altrimenti eseguo tutto il codice e, arrivato alla label,
+    eseguo anche il codice contenuto al suo interno
+\end{itemize}
+
+\subsection{Salto condizionale}
+È un tipo di salto che valuta una condizione.
+\begin{itemize}
+    \item se due operandi sono uguali, si usa la \texttt{beq}
+    \item se due operandi sono diversi, si usa la \texttt{bne}
+\end{itemize}
+
+\vspace{2mm}
 
 \noindent
+Queste istruzioni sono di tipo I (con 16 bit di label nel campo
+\texttt{imm}).
+\\[2mm]
+\underline{\textbf{Nota bene}: la label è un immediato (indirizzo
+$\rightarrow$ valore numerico) da 16 bit (l'indirizzo di memoria è da} \\
+\underline{26 bit ma in seguito si vedrà come convertirlo a 16...).}
+
+\vspace*{2mm}
+
+\subsubsection{Istruzione \texttt{beq}}
+L'istruzione \texttt{beq} fa un confronto tra i due registri e, se il loro contenuto
+è uguale, allora salta nel pezzo di codice identificato dalla label.
+\\[2mm]
 \textbf{Codice MIPS assembly} \\
-\texttt{addi \$s0, \$0, 4           \# \$s0 = 4} \\
-\texttt{addi \$s1, \$0, 1           \# \$s1 = 1} \\
-\texttt{j target                    \# jump to target} \\
-\texttt{sra \$s1, \$s1, 2           \# not executed} \\
-\texttt{addi \$s1, \$s1, 1          \# not executed} \\
-\texttt{sub \$s1, \$s1, \$s0        \# not executed} \\
+\texttt{addi \$s0, \$0, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s0 = 0 + 4 = 4} \\
+\texttt{addi \$s1, \$0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 0 + 1 = 1} \\
+\texttt{sll \$s1, \$s1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 1 $<<$ 2 = 4} \\
+\texttt{beq \$s0, \$s1, target \hspace*{0cm} \# condizione verificata (=)} \\
+\texttt{addi \$s1, \$s1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# non eseguita} \\
+\texttt{sub \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# non eseguita} \\
+\\
+\texttt{target: \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# label} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} add \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \# \$s1 = 4 + 4 = 8}
+
+\vspace*{2mm}
+
+\subsubsection{Istruzione \texttt{bne}}
+L'istruzione \texttt{bne} fa un confronto tra i due registri e, se il loro contenuto
+è diverso, allora salta nel pezzo di codice identificato dalla label.
+\\[2mm]
+\textbf{Codice MIPS assembly} \\
+\texttt{addi \$s0, \$0, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s0 = 0 + 4 = 4} \\
+\texttt{addi \$s1, \$0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 0 + 1 = 1} \\
+\texttt{sll \$s1, \$s1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 1 $<<$ 2 = 4} \\
+\texttt{bne \$s0, \$s1, target \hspace*{0cm} \# condizione non verificata ($\neq$)} \\
+\texttt{addi \$s1, \$s1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 4 + 1 = 5} \\
+\texttt{sub \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 5 $–$ 4 = 1} \\
+\\
+\texttt{target: \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# label} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} add \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \# \$s1 = 1 + 4 = 5} \\
+
+\newpage
+
+\subsection{Salto incondizionale}
+È un tipo di salto che viene effettuato senza nessuna condizione predefinita.
+\begin{itemize}
+    \item in questa categoria ci sono le istruzioni
+    \texttt{j}, \texttt{jr} e \texttt{jal}
+\end{itemize}
+
+\vspace*{-4mm}
+
+\subsubsection{Istruzione \texttt{j}}
+L'istruzione \texttt{j} serve per saltare ad un pezzo di codice
+contrassegnato da una label.
+\\[2mm]
+\textbf{Codice MIPS assembly} \\
+\texttt{addi \$s0, \$0, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s0 = 0 + 4 = 4} \\
+\texttt{addi \$s1, \$0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s1 = 1} \\
+\texttt{j target \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salta a target} \\
+\texttt{sra \$s1, \$s1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# non eseguita} \\
+\texttt{addi \$s1, \$s1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# non eseguita} \\
+\texttt{sub \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# non eseguita} \\
 \\
 \texttt{target:} \\
-\texttt{add \$s1, \$s1, \$s0        \# \$s1 = 1 + 4 = 5} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} add \$s1, \$s1, \$s0 \hspace*{0cm} \hspace*{0cm} \# \$s1 = 1 + 4 = 5} \\
 
-\noindent
+\begin{table}[h!]
+    \centering
+
+    \caption*{\texttt{j} è un'istruzione di \textbf{tipo J}}
+    \setlength{\tabcolsep}{0pt}
+    \begin{tabular}{ c c | c | c }
+        \vspace*{-4.2mm} & \multicolumn{1}{ p{(\linewidth / 48) * 6} }{} & \multicolumn{1}{ p{((\linewidth / 48) * 26)} }{} \\
+        \cline{2-3}
+        \multicolumn{1}{ c | }{} & \texttt{\textbf{op}} & \texttt{\textbf{addr}} & \\
+        \cline{2-3}
+        \rule{0pt}{.8\normalbaselineskip} & \multicolumn{1}{ c }{6 bits} & \multicolumn{1}{ c }{26 bits} & \\
+    \end{tabular}
+\end{table}
+
+\vspace*{-10mm}
+
+\subsubsection{Istruzione \texttt{jr}}
+L'istruzione \texttt{jr} serve per saltare ad un'istruzione specifica
+memorizzando il suo indirizzo (posizione) \\ in un registro.
+\\[2mm]
 \textbf{Codice MIPS assembly} \\
 \begin{table}[h!]
     \vspace*{-5mm}
+    \hspace*{-.87cm}
     \setlength{\tabcolsep}{18pt}
-    \begin{tabular}{ l l }
+    \begin{tabular}{ p{1.75cm} l }
         \textbf{\texttt{0x00002000}} & \texttt{addi \$s0, \$0, 0x2010} \\
         \textbf{\texttt{0x00002004}} & \texttt{jr \$s0} \\
         \textbf{\texttt{0x00002008}} & \texttt{addi \$s1, \$0, 1} \\
@@ -249,10 +341,39 @@ TODO: rivedere
     \end{tabular}
 \end{table}
 
-\section{Costrutti di alto livello}
-TODO
+\begin{table}[h!]
+    \centering
 
-\subsection{if statement (TODO)}
+    \caption*{\texttt{jr} è un'istruzione di \textbf{tipo R}}
+    \setlength{\tabcolsep}{0pt}
+    \begin{tabular}{ c c | c | c | c | c | c | c }
+        \vspace*{-4.2mm} & \multicolumn{1}{ p{(\linewidth / 48) * 6} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 6} }{} \\
+        \cline{2-7}
+        \multicolumn{1}{ c | }{} & \texttt{\textbf{0}} & \texttt{\textbf{rs}} & \texttt{0} & \texttt{0} & \texttt{0} & \texttt{\textbf{9}} & \\
+        \cline{2-7}
+        \rule{0pt}{.8\normalbaselineskip} & \multicolumn{1}{ c }{6 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{6 bits} & \\
+    \end{tabular}
+\end{table}
+
+\noindent
+\underline{Con questa istruzione, la CPU aggiorna il Program Counter con
+l'indirizzo contenuto nel registro che ho} \\
+\underline{passato come parametro alla \texttt{jr}.}
+
+\section{Costrutti di alto livello}
+Implementazione di alcuni costrutti di alto livello in MIPS.
+
+\subsection{if then}
+\vspace*{-2mm}
+Se la condizione è verificata
+\begin{itemize}
+    \item allora eseguo la somma e la differenza
+    \item altrimenti eseguo solamente la differenza
+\end{itemize}
+
+\vspace*{2mm}
+
+\noindent
 \begin{tabular}{ p{7cm} p{7cm} }
     \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
     & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
@@ -263,48 +384,166 @@ TODO
     & \texttt{L1: sub \$s0, \$s0, \$s3} \\
 \end{tabular}
 
-\noindent
-\begin{tabular}{ p{7cm} p{7cm} }
-    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
-    & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
-	\texttt{if (i == j)} & \texttt{\# \$s3 = i, \$s4 = j} \\
-    \texttt{ \hspace*{0cm} f = g + h;} & \texttt{ \hspace*{0cm} bne \$s3, \$s4, L1} \\
-    \texttt{else} & \texttt{ \hspace*{0cm} add \$s0, \$s1, \$s2} \\
-    \texttt{ \hspace*{0cm} f = f $–$ i;} & \texttt{ \hspace*{0cm} j done} \\
-    & \texttt{L1: sub \$s0, \$s0, \$s3} \\
-    & \texttt{done:} \\
-\end{tabular}
-
-\noindent
-TODO
-
-\noindent
-\texttt{beq \$s3, \$s4, L2} \\
-\texttt{J L1} \\
-\texttt{L2: add \$s0, \$s1, \$s2} \\
-\texttt{L1: sub \$s0, \$s0, \$s3} \\
+\vspace*{2.5mm}
 
 \noindent
 \underline{\textbf{Nota bene}: assembly testa i casi negativi (i != j)
 al contrario dell'alto livello (i == j).}
 
-\subsection{Ciclo while}
-TODO
+\subsection{if then/else}
+\vspace*{-2mm}
+Per creare il ramo \texttt{else} devo utilizzare un'istruzione di salto
+incondizionato.
 
-\subsection{Ciclo for}
-TODO
-
-\subsection{Magnitude comparison (TODO)}
-slt - Set on Less Than
-TODO
-TODO
+\vspace*{2.5mm}
 
 \noindent
 \begin{tabular}{ p{7cm} p{7cm} }
     \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
+	\texttt{if (i == j)} & \texttt{\# \$s3 = i, \$s4 = j} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = g + h;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} bne \$s3, \$s4, L1} \\
+    \texttt{else} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$s0, \$s1, \$s2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = f $–$ i;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{j done}} \\
+    & \texttt{L1: \hspace*{0cm} sub \$s0, \$s0, \$s3} \\
+    \\
+    & \texttt{done:} \\
+\end{tabular}
+
+\vspace*{2.5mm}
+
+\noindent
+\begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = f} \\
+	\texttt{if (i != j)} & \texttt{\# \$s3 = i, \$s4 = j} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f++;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{beq \$s3, \$s4, L1}} \\
+    \texttt{else} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s0, \$s0, 1} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f--;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{j done}} \\
+    & \texttt{L1: \hspace*{0cm} addi \$s0, \$s0, -1} \\
+    \\
+    & \texttt{done:} \\
+\end{tabular}
+
+\subsection{while}
+\vspace*{-2mm}
+Per implementare un \texttt{while} bisogna utilizzare un'istruzione
+di salto condizionale seguita da una incondizionale.
+
+\vspace*{2.5mm}
+
+\begin{tabular}{ p{7cm} p{7cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{// determina la potenza} & \texttt{\# \$s0 = pow, \$s1 = x} \\
+    \texttt{// di x come $2^\text{x}$ = 128} \\
+    \texttt{int pow = 1;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s0, \$0, 1} \\
+    \texttt{int x = 0;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$s1, \$0, \$0} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t0, \$0, 128} \\
+    \texttt{while (pow != 128) \{} & \texttt{while: beq \$s0, \$t0, done} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} pow = pow * 2;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sll \$s0, \$s0, 1} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} x = x + 1;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s1, \$s1, 1} \\
+    \texttt{\}} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j while} \\
+    \\
+    & \texttt{done:} \\
+\end{tabular}
+
+\vspace*{2.5mm}
+
+\noindent
+\underline{\textbf{Nota bene}: Assembly controlla per il caso
+opposto (\texttt{pow == 128}) rispetto al codice C (\texttt{pow != 128}).}
+
+\subsection{for}
+\vspace*{-2mm}
+Per implementare un \texttt{for} bisogna utilizzare un'istruzione
+di salto condizionale che lavori con un contatore ed un
+salto incondizionale.
+
+\vspace*{2.5mm}
+
+\noindent
+\begin{tabular}{ p{9cm} p{9cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{// aggiunge i numeri da 0 a 9} & \texttt{\# \$s0 = i, \$s1 = sum} \\
+    \texttt{int sum = 0;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s0, \$0, 0} \\
+    \texttt{int i;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$s0, \$0, \$0} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t0, \$0, 10} \\
+    \texttt{for (i = 0; i != 10; i = i + 1) \{} & \texttt{for: beq \$s0, \$t0, done} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sum = sum + i;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$s1, \$s1, \$s0} \\
+    \texttt{\}} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s0, \$s0, 1} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j for} \\
+    \\
+    & \texttt{done:} \\
+\end{tabular}
+
+\newpage
+
+\section{Confronto di grandezze}
+L'istruzione \textit{''Set on Less Than"} (\texttt{slt}) fa il confronto
+tra due registri secondo l'ordine in cui compaiono.
+
+\vspace*{-2mm}
+
+\begin{table}[h!]
+    \begin{minipage}{.5\linewidth}
+        \texttt{slt rd, rs, rt}
+        \begin{itemize}
+            \item \texttt{if (rs $<$ rt) \\
+            \hspace*{0cm} \hspace*{0cm} rd = 1; \\
+            else \\
+            \hspace*{0cm} \hspace*{0cm} rd = 0;}
+        \end{itemize}
+    \end{minipage}
+    \begin{minipage}{.5\linewidth}
+        \texttt{slti rt, rs, constant}
+        \begin{itemize}
+            \item \texttt{if (rs $<$ constant) \\
+            \hspace*{0cm} \hspace*{0cm}  rt = 1; \\
+            else \\
+            \hspace*{0cm} \hspace*{0cm} rt = 0;}
+        \end{itemize}
+    \end{minipage}
+\end{table}
+
+\noindent
+Usando in coppia la \texttt{slt} e la \texttt{bne} posso implementare
+un salto condizionale con una condizione di minore tra due registri.
+\\[2mm]
+\texttt{slt \$t0, \$s1, \$s2 \# if (\$s1 $<$ \$s2)} \\
+\texttt{bne \$t0, \$0, L \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \hspace*{0cm} \hspace*{0cm} branch to L}
+\\[2mm]
+Inoltre, è possibile lavorare con numeri:
+\begin{itemize}
+    \item con segno utilizzando le istruzioni \texttt{slt} e \texttt{slti}
+    \item senza segno utilizzando le istruzioni \texttt{sltu} e \texttt{sltui}
+\end{itemize}
+
+\vspace*{5mm}
+
+\noindent
+\textbf{Esempio} \\
+\texttt{\$s0 = 1111 1111 1111 1111 1111 1111 1111 1111} \\
+\texttt{\$s1 = 0000 0000 0000 0000 0000 0000 0000 0001}
+\begin{table}[h!]
+    \begin{minipage}{.5\linewidth}
+        \texttt{slt \$t0, \$s0, \$s1 \# signed} \\
+        \texttt{\hspace*{0cm} \hspace*{0cm} $-$1 $<$ +1 $\Rightarrow$ \$t0 = 1} \\
+    \end{minipage}
+    \begin{minipage}{.5\linewidth}
+        \texttt{sltu \$t0, \$s0, \$s1 \# unsigned} \\
+\texttt{\hspace*{0cm} \hspace*{0cm} +4,294,967,295 $>$ +1 $\Rightarrow$ \$t0 = 0} \\
+    \end{minipage}
+\end{table}
+
+\noindent
+\textbf{Esempio} \\
+Ciclo con la condizione di minore.
+\\[3mm]
+\begin{tabular}{ p{9cm} p{9cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
     & \texttt{\# \$s0 = i, \$s1 = sum} \\
-    \texttt{// add the powers of 2 from 1} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s1, \$0, 0} \\
-    \texttt{// to 100} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s0, \$0, 1} \\
+    \texttt{// incrementa con le potenze del 2 da 1} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s1, \$0, 0} \\
+    \texttt{// a 100} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} addi \$s0, \$0, 1} \\
     \texttt{int sum = 0;} & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm}  addi \$t0, \$0, 101} \\
     \texttt{int i;} & \texttt{loop: slt \$t1, \$s0, \$t0} \\
     & \texttt{ \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} \hspace{0cm} beq \$t1, \$0, done} \\
@@ -314,6 +553,52 @@ TODO
     & \texttt{done:} \\
 \end{tabular}
 
-TODO
+\noindent
+\underline{\textbf{Nota bene}: \texttt{\$t1 = 1 se i $<$ 101}}
+
+\section{Confronti con pseudoistruzioni}
+Per semplificare la scrittura del codice, sono state implementate alcune
+pseudoistruzioni per effettuare i confronti tra le grandezze. \\
+Di seguito, è presente una lista delle pseudoistruzioni disponibili.
+
+\begin{table}[h!]
+    \begin{minipage}{.5\linewidth}
+        \begin{tabular}{ l l }
+            \multicolumn{2}{c}{\textbf{Istruzioni - Valori con segno}} \\
+            \texttt{bge \$t0, \$s0, L1} & \texttt{slt \$at, \$t0, \$s0} \\
+            & \texttt{beq \$at, \$0, L1} \\
+            \texttt{blt \$t0, \$s0, L1} & \texttt{slt \$at, \$t0, \$s0} \\
+            & \texttt{bne \$at, \$0, L1} \\
+            \texttt{bgt \$t0, \$s0, L1} & \texttt{slt \$at, \$s0, \$t0} \\
+            & \texttt{bne \$at, \$0, L1} \\
+            \texttt{ble \$t0, \$s0, L1} & \texttt{slt \$at, \$s0, \$t0} \\
+            & \texttt{beq \$at, \$0, L1} \\
+        \end{tabular}
+    \end{minipage}
+    \begin{minipage}{.5\linewidth}
+        \begin{tabular}{ l l }
+            \multicolumn{2}{c}{\textbf{Istruzioni - Valori senza segno}} \\
+            \texttt{bgeu \$t0, \$s0, L1} & \texttt{sltu \$at, \$t0, \$s0} \\
+            & \texttt{beq \$at, \$0, L1} \\
+            \texttt{bltu \$t0, \$s0, L1} & \texttt{sltu \$at, \$t0, \$s0} \\
+            & \texttt{bne \$at, \$0, L1} \\
+            \texttt{bgtu \$t0, \$s0, L1} & \texttt{sltu \$at, \$s0, \$t0} \\
+            & \texttt{bne \$at, \$0, L1} \\
+            \texttt{bleu \$t0, \$s0, L1} & \texttt{sltu \$at, \$s0, \$t0} \\
+            & \texttt{beq \$at, \$0, L1} \\
+        \end{tabular}
+    \end{minipage}
+\end{table}
+
+\noindent
+\textbf{Esempio} \\
+L'istruzione \textit{''branch if less than"} (\texttt{blt})
+confronta 2 registri, trattandoli come valori interi con segno
+ed effettua un salto se il primo registro è minore del secondo. \\
+Quindi, la pseudoistruzione \\
+\texttt{\hspace*{5mm}blt \$8, \$9, label} \\
+si traduce in \\
+\texttt{\hspace*{5mm}slt \$1, \$8, \$9} \\
+\texttt{\hspace*{5mm}bne \$1, \$0, label} \\
 
 \end{document}

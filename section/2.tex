@@ -551,21 +551,7 @@ Successivamente, la CPU decodifica l'istruzione:
 
 \newpage
 
-\chapter{Costrutti standard}
-I comuni linguaggi di alto livello hanno istruzioni che mi permettono
-di fare determinate operazioni standard, tra cui:
-\vspace*{-2mm}
-\begin{table}[h!]
-    \centering
-
-    \setlength{\tabcolsep}{18pt}
-    \begin{tabular}{ c c c c c }
-        \texttt{if / else} & \texttt{cicli} & \texttt{vettori / matrici} & \texttt{funzioni} \\
-    \end{tabular}
-\end{table}
-\vspace*{-2mm}
-
-\section{Operazioni di tipo logico}
+\chapter{Altre istruzioni MIPS}
 \underline{Queste istruzioni lavorano sul singolo bit della \texttt{word}.}
 
 \begin{table}[h!]
@@ -592,7 +578,7 @@ di fare determinate operazioni standard, tra cui:
     \end{tabular}
 \end{table}
 
-\subsection{Istruzioni logiche}
+\section{Istruzioni logiche}
 \begin{itemize}
     \item \textbf{\texttt{and}, \texttt{or}, \texttt{xor}, \texttt{nor}} (istruzioni di tipo R)
     \begin{itemize}
@@ -609,13 +595,15 @@ di fare determinate operazioni standard, tra cui:
     \end{itemize}
 \end{itemize}
 
-\subsubsection*{Estensione con zeri}
+\subsection*{Estensione con zeri}
 Le istruzioni logiche che utilizzano un immediato devono
 effettuare una conversione a 32 bit. \\
 Con l'estensione di zeri, si rappresenta l'immediato con i 16 bit
 meno significativi e i 16 bit più significativi sono posti a 0.
 
-\subsection*{Esempio 1}
+\vspace*{5mm}
+
+\subsubsection*{Esempio 1}
 \vspace*{-3mm}
 \begin{table}[h!]
     \centering
@@ -648,9 +636,7 @@ meno significativi e i 16 bit più significativi sono posti a 0.
     \end{tabular}
 \end{table}
 
-\vspace*{-3mm}
-
-\subsection*{Esempio 2}
+\subsubsection*{Esempio 2}
 \vspace*{-3mm}
 \begin{table}[h!]
     \centering
@@ -707,7 +693,7 @@ Scrivere un breve comando assembly che abbia la seguente funzionalità:
 \texttt{ORI \$t0, \$t1, 0xF234} \\
 \texttt{NOR \$t0, \$t0, \$0}
 
-\subsection{Istruzioni di shift}
+\section{Istruzioni di shift}
 Il campo che determina il numero di posizioni da shiftare è lo \texttt{shamt}.
 \begin{table}[h!]
     \centering
@@ -748,7 +734,7 @@ Esempi:
 \underline{\textbf{Nota bene}: queste istruzioni non sono di tipo I
 nonostante utilizzino una costante (sono di tipo R).}
 
-\subsubsection{Shift logico}
+\subsection{Shift logico}
 \vspace*{-4mm}
 \begin{table}[h!]
     \begin{minipage}{.02\linewidth}
@@ -824,7 +810,7 @@ Dato il numero \texttt{00 00 10 10}, con lo shift logico: \\
     & • \hspace{-.5mm} a destra ottengo & & \texttt{00 00 00 10} & & (i bit meno significativi vengono persi) \\
 \end{tabular}
 
-\subsubsection{Shift aritmetico}
+\subsection{Shift aritmetico}
 Lo shift aritmetico mi permette di fare una divisione per numeri in
 complemento a 2 (con segno).
 
@@ -856,7 +842,7 @@ ottengo \texttt{1110} ($-$2 = \nicefrac{$-$4}{2}).
 
 \newpage
 
-\subsubsection{Shift variabile}
+\subsection{Shift variabile}
 Esistono anche le varianti delle istruzioni precedenti,
 con il numero di shift definito con una variabile \\
 anziché con un valore immediato. \\
