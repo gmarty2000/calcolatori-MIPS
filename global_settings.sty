@@ -1,0 +1,166 @@
+\ProvidesPackage{settings}
+
+% -------------------- Variable changes section (0) --------------------
+\let\origcontentsline\contentsline
+\let\origaddtocontents\addtocontents
+
+% -------------------- Library section (1) --------------------
+
+\usepackage[legalpaper, margin=1in]{geometry}   % Define the global settings of the document
+\usepackage[utf8]{inputenc}                     % Define the UFT-8 encode usage
+\usepackage[italian]{babel}                     % Use the Italian language in the document
+
+\usepackage{amsmath}                            % ???
+\usepackage{caption}                            % ???
+\usepackage[style=empty]{clrdblpg}              % Remove page number if page is empty
+\usepackage{color}                              % Define custom color
+\usepackage{courier}                            % Font style
+\usepackage{enumitem}                           % Listing settings
+\usepackage{fancyhdr}                           % Custom (book) header
+\usepackage{graphicx}                           % Import external image file
+\usepackage{hyperref}                           % Allow hyperlink in the document 
+\usepackage{lipsum}                             % Generate 'Lorem ipsum' text
+\usepackage{listings}                           % Coding panel
+\usepackage{multicol}                           % Use multi column section
+\usepackage[cleardoublepage=plain]{scrextend}   % Remove fancy header in empty pages
+\usepackage{setspace}                           % ???
+\usepackage{subfiles}                           % Allow to concat more file in a project
+\usepackage{titlesec}                           % Customize titles (title format)
+\usepackage{titling}                            % Customize titles (create subtitles)
+
+% -------------------- Settings section (2) --------------------
+
+% color - Define new custom color
+\definecolor{SQL_background}{RGB}{245,245,245}
+\definecolor{SQL_keyword}{RGB}{47,112,212}
+\definecolor{SQL_number}{RGB}{50,205,50}
+\definecolor{SQL_string}{RGB}{255,0,0}
+\definecolor{SQL_type}{RGB}{255,128,0}
+\definecolor{SQL_comment}{RGB}{112,128,145}
+\definecolor{SQL_index}{RGB}{255,0,127}
+\definecolor{SQL_other}{RGB}{0,127,127}
+
+% fancyhdr - Define new command (change default string)
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+% fancyhdr - Define new page style (index and content)
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyhead{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+\fancypagestyle{main}{
+    \fancyhf{}
+    \fancyhead[CO]{Cap. \thechapter \space - \leftmark}
+    \fancyhead[CE]{Par. \thesection \space - \rightmark}
+    \fancyhead[LO, RE]{\thepage}
+    \renewcommand{\headrulewidth}{0.4pt}
+}
+
+% enumitem - Remove interline before begin and add space after end
+\setlist[itemize]{noitemsep, topsep=0pt}
+\setlist[enumerate]{noitemsep, topsep=0pt}
+
+% hyperref - Custom settings
+\hypersetup{
+    colorlinks=true,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black,
+    pdftitle={Basi di dati}
+}
+
+% listings - Custom caption label text
+\def\lstlistingname{Esempio}
+\AtBeginDocument{\counterwithin{lstlisting}{section}}
+
+% listings - Custom char color
+\lstdefinestyle{BeatifulChar}{
+    stringstyle=\color{SQL_string},
+    literate=
+        {0}{{\small\bfseries\textcolor{SQL_number}{0}}}{1}
+        {1}{{\small\bfseries\textcolor{SQL_number}{1}}}{1}
+        {2}{{\small\bfseries\textcolor{SQL_number}{2}}}{1}
+        {3}{{\small\bfseries\textcolor{SQL_number}{3}}}{1}
+        {4}{{\small\bfseries\textcolor{SQL_number}{4}}}{1}
+        {5}{{\small\bfseries\textcolor{SQL_number}{5}}}{1}
+        {6}{{\small\bfseries\textcolor{SQL_number}{6}}}{1}
+        {7}{{\small\bfseries\textcolor{SQL_number}{7}}}{1}
+        {8}{{\small\bfseries\textcolor{SQL_number}{8}}}{1}
+        {9}{{\small\bfseries\textcolor{SQL_number}{9}}}{1}
+}
+
+% listings - Custom settings
+\lstset{
+    language=SQL,
+    style=BeatifulChar,
+    numbers=left,
+    stepnumber=1,
+    backgroundcolor=\color{SQL_background},
+    numberstyle=\small\color{SQL_index},
+    numbersep=5pt,
+    frame=lrb,         
+    framesep=0pt,
+    rulesep=0pt,
+    commentstyle=\color{SQL_comment},
+    identifierstyle=\color{SQL_other},
+    keywordstyle=\color{SQL_keyword}\bfseries,
+    keywordstyle=[2]\color{SQL_type}\small\bfseries,
+    showspaces=false,
+    showtabs=false,
+    breaklines=true,
+    showstringspaces=false,
+    breakatwhitespace=true,
+    escapeinside={(*@}{@*)},
+    keepspaces=true,
+    columns=flexible,
+    showspaces=false,
+    belowcaptionskip=1\baselineskip,
+    frame=tb,
+    xleftmargin=\parindent,
+    showstringspaces=false,
+    basicstyle=\ttfamily,
+    tabsize=4,
+    inputencoding=latin1,
+    belowcaptionskip=5pt,
+    framexleftmargin=15pt,
+    framexrightmargin=0pt,
+    framextopmargin=2pt,
+    framexbottommargin=2pt
+}
+
+% titlesec - Change chapter format
+\titleformat{\chapter}[hang]  
+  {\normalfont\huge\bfseries\setstretch{0.1}}
+  {\chaptertitlename\ \thechapter \space - }{0pt}{\LARGE}
+\titlespacing*{\chapter}{0pt}{0pt}{15pt}
+
+% titling - Create new command to create custom subtitle
+\newcommand{\subtitle}[1]{%
+  \posttitle{%
+    \par\end{center}
+    \begin{center}\large#1\end{center}
+    \vskip0.5em}%
+}
+
+% -> Remove top margin above 'tableofcontents' <-
+\begingroup
+\makeatletter
+\def\@makeschapterhead#1{
+{\parindent \z@ \raggedright
+\normalfont
+\interlinepenalty\@M
+\Huge \bfseries  #1\par\nobreak
+\vskip 10\p@
+}}
+\makeatother
+
+% -> Set the maximum depth of the 'tableofcontents' <-
+\setcounter{tocdepth}{4}
+
+% -> Custom tabulation command
+\newcommand\tab[1][1cm]{\hspace*{#1}}
