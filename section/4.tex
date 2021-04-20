@@ -1,0 +1,702 @@
+% Lezione del 12/04/2021
+
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\section{Altre implementazione di costrutti}
+Implementazione di alcuni costrutti di alto livello in MIPS
+utilizzando i confronti.
+\subsection{if then else ($<$)}
+Implementazione del costrutto per la condizione
+con il confronto per $<$. \\[3.5mm]
+\noindent
+\begin{tabular}{ p{8cm} p{8cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{int a, b, c;} & \texttt{\# \$t1 = a, \$t2 = b, \$t3 = c} \\
+    & \texttt{main:} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t1, \$0, 6} \\
+    \texttt{if ({\sethlcolor{yellow}\hl{a $<$ b}}) \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 5} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 5;} \\
+    \texttt{\} {\sethlcolor{red}\hl{else}} \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} slt \$t4, \$t1, \$t2 \hspace*{0cm} \# if ({\sethlcolor{yellow}\hl{a $<$ b}})} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 8;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t4, \$0, L1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{red}\hl{else}}} \\
+    \texttt{\}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t3, \$0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{yellow}\hl{then}}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j L2} \\
+    \\
+    & \texttt{L1:\hspace*{2.1mm}addi \$t3, \$0, 8 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{red}\hl{else}}} \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\subsection{if then else ($>$)}
+Implementazione del costrutto per la condizione
+con il confronto per $>$. \\[3.5mm]
+\noindent
+\begin{tabular}{ p{8cm} p{8cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{int a, b, c;} & \texttt{\# \$t1 = a, \$t2 = b, \$t3 = c} \\
+    & \texttt{main:} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t1, \$0, 6} \\
+    \texttt{if ({\sethlcolor{yellow}\hl{a $>$ b}}) \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 5} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 5;} \\
+    \texttt{\} {\sethlcolor{red}\hl{else}} \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} slt \$t4, \$t2, \$t1 \hspace*{0cm} \# if ({\sethlcolor{yellow}\hl{b $<$ a}})} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 8;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t4, \$0, L1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{red}\hl{else}}} \\
+    \texttt{\}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t3, \$0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{yellow}\hl{then}}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j L2} \\
+    \\
+    & \texttt{L1:\hspace*{2.1mm}addi \$t3, \$0, 8 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# {\sethlcolor{red}\hl{else}}} \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\subsection{if then else ($>=$)}
+Implementazione del costrutto per la condizione
+con il confronto per $>=$. \\[3.5mm]
+\noindent
+\begin{tabular}{ p{8cm} p{8cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{int a, b, c;} & \texttt{\# \$t1 = a, \$t2 = b, \$t3 = c} \\
+    & \texttt{main:} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t1, \$0, 6} \\
+    \texttt{if ({\sethlcolor{yellow}\hl{a $>=$ b}}) \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 5} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 5;} \\
+    \texttt{\} else /* {\sethlcolor{red}\hl{a $<$ b}} */ \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} slt \$t4, \$t1, \$t2 \hspace*{0cm} \# if ({\sethlcolor{red}\hl{a $<$ b}})} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 8;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t4, \$0, L1 } \\
+    \texttt{\}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t3, \$0, 8 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ({\sethlcolor{red}\hl{a $<$ b}}}) \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j L2} \\
+    \\
+    & \texttt{L1:\hspace*{2.1mm}addi \$t3, \$0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ({\sethlcolor{yellow}\hl{a $>=$ b}}}) \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\newpage
+
+\subsection{if then else ($<=$)}
+Implementazione del costrutto per la condizione
+con il confronto per $<=$. \\[3.5mm]
+\noindent
+\begin{tabular}{ p{8cm} p{8cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    \texttt{int a, b, c;} & \texttt{\# \$t1 = a, \$t2 = b, \$t3 = c} \\
+    & \texttt{main:} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t1, \$0, 6} \\
+    \texttt{if ({\sethlcolor{yellow}\hl{a $<=$ b}}) \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 5} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 5;} \\
+    \texttt{\} else /* {\sethlcolor{red}\hl{a $>$ b}} */ \{} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} slt \$t4, \$t2, \$t1 \hspace*{0cm} \# if ({\sethlcolor{red}\hl{b $<$ a}})} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} c = 8;} & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t4, \$0, L1 } \\
+    \texttt{\}} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t3, \$0, 8 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ({\sethlcolor{red}\hl{b $<$ a}}}) \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j L2} \\
+    \\
+    & \texttt{L1:\hspace*{2.1mm}addi \$t3, \$0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ({\sethlcolor{yellow}\hl{a $<=$ b}}}) \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\vspace*{1cm}
+
+\section*{Esempio}
+Il seguente esercizio serve per effettuare la somma dei quadrati
+dei numeri da 1 a n. \\[5mm]
+\textbf{Codice}
+\lstinputlisting{example/4.0_somma_di_quadrati.asm}
+
+\newpage
+
+\subsection{switch case}
+Implementazione del costrutto \texttt{switch}. \\[3.5mm]
+\noindent
+\begin{tabular}{ p{8cm} p{8cm} }
+    \textbf{Codice C} & \textbf{Codice MIPS assembly} \\
+    & \texttt{\# \$s0 = f, \$s1 = g, \$s2 = h} \\
+    & \texttt{\# \$s5 = k} \\
+    \texttt{switch (k) \{} & \texttt{.data} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} case 0: f = g + h;} & \texttt{JumpTable:} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} break;} & \texttt{ \hspace*{0cm} \hspace*{0cm} .word L0, L1, L2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} case 1: f = g - h;} & \texttt{ \hspace*{0cm} \hspace*{0cm} .text} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} break;} & \texttt{ \hspace*{0cm} \hspace*{0cm} .globl main} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} case 2: f = 0;} \\
+    \texttt{\}} & \texttt{main:} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$t4, JumpTable} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sll \$t1, \$s5, 2} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t1, \$t1, \$t4} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t0, 0(\$t1)} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jr \$t0} \\
+    & \texttt{L0: add \$s0, \$s1, \$s2} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j next} \\
+    & \texttt{L1:\hspace*{2.1mm} sub \$s0, \$s1, \$s2} \\
+    & \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j next} \\
+    & \texttt{L2:\hspace*{2.1mm} add \$s0, \$0, \$0} \\
+    & \texttt{next:} \\
+\end{tabular}
+
+\vspace*{5mm}
+
+\noindent
+\textbf{Analisi del codice}
+\\[1mm]
+In questo esempio, nel segmento \texttt{.data} (dove sono contenuti i dati),
+è presente una label \texttt{JumpTable}, ovvero un indirizzo
+dove si trovano determinate variabili.
+
+\vspace*{1mm}
+
+\begin{itemize}
+    \item In corrispondenza di \texttt{JumpTable} viene memorizzata
+    la definizione delle variabili, ovvero i loro 3 indirizzi
+    (delle istruzioni) corrispondenti (3 valori da 32 bit,
+    ovvero 3 \texttt{word}). \\
+    \underline{Gli indirizzi sono memorizzati
+    in sequenza, come per un vettore.}
+    \vspace*{1mm}
+    \item L'istruzione
+    \begin{enumerate}
+        \item \texttt{la \$t4, JumpTable}:
+        \begin{itemize}
+            \item carica l'indirizzo di \texttt{JumpTable}
+            nel registro \texttt{\$t4};
+            \item all'indirizzo \texttt{JumpTable} è memorizzato il valore
+            \texttt{L0}, ovvero l'indirizzo dell'istruzione.
+        \end{itemize}
+        \item \texttt{sll \$t1, \$s5, 2 \hspace*{0cm} \hspace*{0cm} \# \$t1 = k * 4}
+        \begin{itemize}
+            \item effettua uno shift di 2 posizioni (equivalente a
+            moltiplicare \texttt{\$s5} per 4)
+        \end{itemize}
+        \item \texttt{add \$t1, \$t1, \$t4 \# \$t1 = JumpTable + k * 4}
+        \begin{itemize}
+            \item aggiorno il registro per avere l'indirizzo
+            di salto corretto
+        \end{itemize}
+        \item \texttt{lw \$t0, 0(\$t1)}
+        \begin{itemize}
+            \item vado all'indirizzo di memoria puntato da \texttt{\$t1}
+            e carico il valore in \texttt{\$t0}
+        \end{itemize}
+        \item \texttt{jr \$t0}
+        \begin{itemize}
+            \item salto incondizionale che salta a L0, L1 o L2
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
+
+\newpage
+
+\section{Generazione degli indirizzi}
+Consideriamo le istruzioni \texttt{beq} e \texttt{bne}.
+\begin{table}[h!]
+    \centering
+
+    \caption*{\textbf{Tipo I}}
+    \setlength{\tabcolsep}{0pt}
+    \begin{tabular}{ c c | c | c | c | c }
+        \vspace*{-4.2mm} & \multicolumn{1}{ p{(\linewidth / 48) * 6} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 5} }{} & \multicolumn{1}{ p{(\linewidth / 48) * 16} }{} \\
+        \cline{2-5}
+        \multicolumn{1}{ c | }{} & \texttt{op} & \texttt{rs} & \texttt{rt} & \texttt{imm} & \\
+        \cline{2-5}
+        \rule{0pt}{.8\normalbaselineskip} & \multicolumn{1}{ c }{6 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{5 bits} & \multicolumn{1}{ c }{16 bits} & \\
+    \end{tabular}
+\end{table}
+
+\noindent
+Il campo del valore immediato contiene un valore con segno a 16 bit
+che specifica il numero di \texttt{word} "lontane" rispetto al valore
+del Program Counter. \\
+L'indirizzo della label viene prodotto attraverso un valore relativo
+rispetto all'indirizzo del Program Counter. \\
+Quindi, \\
+\hspace*{5mm} \texttt{PC = PC + se imm << 2}, \textit{se = sign extension}
+\\[1mm]
+La CPU, durante il runtime, attraverso la Control Unit,
+aggiorna il Program Counter per effettuare il salto
+\\[2mm]
+\underline{\textbf{Nota bene}: è presente l'estensione del segno perché così posso 
+fare salti in avanti e/o in indietro.}
+
+\vspace*{1cm}
+
+\section*{Esempio}
+\underline{Se si vuole effettuare un "salto lungo", ovvero saltare un pezzo
+di codice molto lungo, bisogna stare attenti} \\
+\underline{allo spazio.} \\
+\textit{Se la distanza è molto lunga, non è esprimibile su \textbf{16 bit}.}
+\\[2mm]
+Ipotizziamo che questo salto sia superiore a
+$\pm$\hspace*{.3mm}$\text{2}^\text{15}$ \texttt{word} ($>$ 16 bit). \\
+In questo caso l'utilizzo della \texttt{beq} e della \texttt{bne} mi
+darebbe un errore in fase di compilazione.
+\\[5mm]
+\begin{tabular}{ p{5cm} p{5cm} p{5mm} r }
+    \texttt{if (i == j) \{} & {\sethlcolor{red}\hl{\texttt{bne \$t0, \$t1, L1}}} & & \multirow{8}{*}{
+        \begin{tikzpicture}[scale=.8]
+            \draw[color=black, fill=gray, thin] (.5, 3.3) ellipse (.3 and .1);
+            \draw[gray, fill] (.2,3.2) rectangle (.8,3.3);
+            \draw[thin] (.2, 3.2) -- (.2, 3.3);
+            \draw[thin] (.8, 3.2) -- (.8, 3.3);
+            \draw[color=black, fill=black!50!gray, thin] (-.2,3) -- (0,3.2) -- (1,3.2) -- (1.2,3) -- cycle;
+            \draw[black, fill] (0,0) rectangle (1,3);
+            \draw[white, fill] (.5,2.5) circle (.4);
+            \draw[red, fill] (.5,2.5) circle (.35);
+            \draw[white, fill] (.5,1.5) circle (.4);
+            \draw[gray, fill] (.5,1.5) circle (.35);
+            \draw[white, fill] (.5,.5) circle (.4);
+            \draw[gray, fill] (.5,.5) circle (.35);
+            \draw[color=black, fill=black!50!gray, thin] (.2,0) rectangle (.8,-.15);
+        \end{tikzpicture}
+    } \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = g - h;} & \texttt{sub \$s0, \$s1, \$s2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{\} else} & \texttt{j L2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = g + h;} & \texttt{L1:\hspace*{2.1mm}add \$s0, \$s1, \$s2} \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\vspace*{5mm}
+
+\noindent
+Per risolvere il problema basta utilizzare un salto incondizionato con
+$\pm$\hspace*{.3mm}$\text{2}^\text{27}$ salti possibili.
+\\[5mm]
+\noindent
+\begin{tabular}{ p{5cm} p{5cm} p{5mm} r }
+    & {\sethlcolor{green}\hl{\texttt{beq \$t0, \$t1, LAB1}}} & & \multirow{8}{*}{
+        \begin{tikzpicture}[scale=.8]
+            \draw[color=black, fill=gray, thin] (.5, 3.3) ellipse (.3 and .1);
+            \draw[gray, fill] (.2,3.2) rectangle (.8,3.3);
+            \draw[thin] (.2, 3.2) -- (.2, 3.3);
+            \draw[thin] (.8, 3.2) -- (.8, 3.3);
+            \draw[color=black, fill=black!50!gray, thin] (-.2,3) -- (0,3.2) -- (1,3.2) -- (1.2,3) -- cycle;
+            \draw[black, fill] (0,0) rectangle (1,3);
+            \draw[white, fill] (.5,2.5) circle (.4);
+            \draw[gray, fill] (.5,2.5) circle (.35);
+            \draw[white, fill] (.5,1.5) circle (.4);
+            \draw[gray, fill] (.5,1.5) circle (.35);
+            \draw[white, fill] (.5,.5) circle (.4);
+            \draw[green, fill] (.5,.5) circle (.35);
+            \draw[color=black, fill=black!50!gray, thin] (.2,0) rectangle (.8,-.15);
+        \end{tikzpicture}
+    } \\
+    \texttt{if (i == j) \{} & {\sethlcolor{green}\hl{\texttt{j L1}}} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = g - h;} & \texttt{sub \$s0, \$s1, \$s2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} & \texttt{\dots} \\
+    \texttt{\} else} & \texttt{j L2} \\
+    \texttt{ \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} f = g + h;} & \texttt{L1:\hspace*{2.1mm}add \$s0, \$s1, \$s2} \\
+    & \texttt{L2:} \\
+\end{tabular}
+
+\vspace*{5mm}
+
+\noindent
+Se non basta avere $\pm$\hspace*{.3mm}$\text{2}^\text{27}$ salti possibili
+allora si possono effettuare più salti per risolvere il problema.
+
+\chapter{Array}
+Implementazione degli array in MIPS.
+\section{Vettore}
+Si ipotizza che il vettore sia registrato in ordine di indirizzi
+crescente. \\
+È necessario un indirizzo base (indirizzo del primo elemento)
+e un indice per spostarsi di posizione nel vettore.
+
+\begin{table}[htb!]
+    \centering
+
+    \setlength{\dashlinegap}{2pt}
+    \setlength{\tabcolsep}{18pt}
+    \begin{tabular}{ c | c | }
+        \multicolumn{1}{ c }{} & \multicolumn{1}{ : p{4cm} : }{} \\
+        \multicolumn{1}{ c }{} & \multicolumn{1}{ : c : }{} \\
+        \cline{2-2}
+        \texttt{0x12340010} & \texttt{array[4]} \\
+        \cline{2-2}
+        \texttt{0x1234800C} & \texttt{array[3]} \\
+        \cline{2-2}
+        \texttt{0x12348008} & \texttt{array[2]} \\
+        \cline{2-2}
+        \texttt{0x12348004} & \texttt{array[1]} \\
+        \cline{2-2}
+        \textbf{\texttt{0x12348000}} & \texttt{array[0]} \\
+        \cline{2-2}
+        \multicolumn{1}{ c }{} & \multicolumn{1}{ : c : }{} \\
+        \multicolumn{1}{ c }{} & \multicolumn{1}{ : c : }{} \\
+    \end{tabular}
+\end{table}
+
+\vspace*{-3.5mm}
+
+\noindent
+\subsection{Accesso al vettore}
+Accesso diretto al vettore ad ogni singola cella.
+\\[5mm]
+\textbf{Codice C} \\
+\texttt{
+    int array[5]; \\
+    array[0] = array[0] * 2; \\
+    array[1] = array[1] * 2; \\[3mm]
+}
+\textbf{Codice MIPS assembly} \\
+\texttt{
+    \# \$s0 = array base address \\
+    \hspace*{0cm} \hspace*{0cm} lui \$s0, 0x1234 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# 0x1234 in upper half of \$s0 \\
+    \hspace*{0cm} \hspace*{0cm} ori \$s0, \$s0, 0x8000 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# 0x8000 in lower half of \$s0 \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} lw \$t1, 0(\$s0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = array[0] \\
+    \hspace*{0cm} \hspace*{0cm} sll \$t1, \$t1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = \$t1 * 2 \\
+    \hspace*{0cm} \hspace*{0cm} sw \$t1, 0(\$s0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# array[0] = \$t1 \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} lw \$t1, 4(\$s0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = array[1] \\
+    \hspace*{0cm} \hspace*{0cm} sll \$t1, \$t1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = \$t1 * 2 \\
+    \hspace*{0cm} \hspace*{0cm} sw \$t1, 4(\$s0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# array[1] = \$t1
+}
+
+\subsection{Vettore con ciclo}
+Accesso diretto al vettore ad ogni cella attraverso un ciclo.
+\\[5mm]
+\textbf{Codice C} \\
+\texttt{
+    int array[1000]; \\
+    int i; \\
+    for (i=0; i < 1000; i = i + 1) \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} array[i] = array[i] * 8; \\[3mm]
+}
+\textbf{Codice MIPS assembly} \\
+\texttt{
+    \# \$s0 = array base address, \$s1 = i \\
+    \# initialization code \\
+    \hspace*{0cm} \hspace*{0cm} lui \$s0, 0x23B8 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$s0 = 0x23B80000 \\
+    \hspace*{0cm} \hspace*{0cm} ori \$s0, \$s0, 0xF000 \hspace*{0cm} \hspace*{0cm} \# \$s0 = 0x23B8F000 \\
+    \hspace*{0cm} \hspace*{0cm} addi \$s1, \$0, 0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# i = 0 \\
+    \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 1000 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t2 = 1000 \\
+    \\
+    loop: \\
+    \hspace*{0cm} \hspace*{0cm} slt \$t0, \$s1, \$t2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# i < 1000? \\
+    \hspace*{0cm} \hspace*{0cm} beq \$t0, \$0, done \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# if not then done \\
+    \hspace*{0cm} \hspace*{0cm} sll \$t0, \$s1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t0 = i * 4 (byte offset) \\
+    \hspace*{0cm} \hspace*{0cm} add \$t0, \$t0, \$s0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# address of array[i] \\
+    \hspace*{0cm} \hspace*{0cm} lw \$t1, 0(\$t0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = array[i] \\
+    \hspace*{0cm} \hspace*{0cm} sll \$t1, \$t1, 3 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = array[i] * 8 \\
+    \hspace*{0cm} \hspace*{0cm} sw \$t1, 0(\$t0) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# array[i] = array[i] * 8 \\
+    \hspace*{0cm} \hspace*{0cm} addi \$s1, \$s1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# i = i + 1 \\
+    \hspace*{0cm} \hspace*{0cm} j loop \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# repeat \\
+    done: \\
+}
+
+\newpage
+
+\section{Array bidimensionale}
+\textbf{Codice C} \\
+\texttt{
+    int matrix[4][2];
+}
+\begin{table}[h!]
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}
+
+    \vspace*{-7mm}
+    \begin{tabular}{ c @{\hskip 1cm} c @{\hskip 1cm} c @{\hskip 1cm} c @{\hskip 1cm} }
+        \multicolumn{1}{p{2cm}}{} & \multicolumn{1}{p{2cm}}{} & \multicolumn{1}{p{2cm}}{} & \multicolumn{1}{p{2cm}}{} \\
+        \rowcolor{gray!30}
+        \textbf{A} & \textbf{B} & \textbf{C} & \textbf{D} \\
+        \\[-5mm]
+        \rowcolor{gray!30}
+        \textbf{E} & \textbf{F} & \textbf{G} & \textbf{H} \\
+    \end{tabular}
+\end{table}
+\\ Gli elementi della matrice sono caricati ordinatamente in memoria,
+partendo dalla prima riga (\textit{salvataggio per righe}). \\
+\begin{table}[h!]
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}
+
+    \vspace*{-1cm}
+    \begin{tabular}{ c c }
+        \multicolumn{1}{p{2cm}}{} & \multicolumn{1}{p{2cm}}{} \\
+        \textbf{\texttt{matrix[0][0]}} & \cellcolor{gray!30} \textbf{A} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[0][1]}} & \cellcolor{gray!30} \textbf{B} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[0][2]}} & \cellcolor{gray!30} \textbf{C} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[0][3]}} & \cellcolor{gray!30} \textbf{D} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[1][0]}} & \cellcolor{gray!30} \textbf{E} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[1][1]}} & \cellcolor{gray!30} \textbf{F} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[1][2]}} & \cellcolor{gray!30} \textbf{G} \\
+        \\[-5mm]
+        \textbf{\texttt{matrix[1][3]}} & \cellcolor{gray!30} \textbf{H} \\
+    \end{tabular}
+\end{table}
+
+\subsection{Accesso per righe alla matrice}
+Implementazione in MIPS:
+\\[5mm]
+\hspace*{5mm} \textbf{Codice C} \\
+\texttt{
+    \hspace*{4mm} int matrix[5][4]; \\
+    \hspace*{4mm} int i; \\
+    \hspace*{4mm} for (i=0; i < 4; i++) \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} matrix[3][i]++; \\[3mm]
+}
+\hspace*{5mm} \textbf{Codice MIPS assembly} \\
+\texttt{
+    \hspace*{4mm} .data \\
+    \hspace*{4mm} matrix: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 8, 10, 11, 1 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 7, 5, 9, 2 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 6, 11, 0, 3 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 4, 3, 8, 4 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 0, 1, 2, 5 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} .text \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .globl main \\
+    \\
+    \hspace*{4mm} main: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$t0, matrix \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$t1, 3 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# row number 3 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$t2, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# number of columns \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} mul \$t3, \$t2, \$t1 \hspace*{0cm} \hspace*{0cm} \# number of words \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# in the first 3 rows \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sll \$t3, \$t3, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# number of bytes \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# in the first 3 rows \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t5, \$t0, \$t3 \hspace*{0cm} \hspace*{0cm} \# \$t5:\hspace*{2.1mm}initial address \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# of row with index 3 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t4, \$0, \$0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t4 = 0 (i) \\
+    \\
+    \hspace*{4mm} Lab1: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t6, (\$t5) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# matrix[3][i] \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t6, \$t6, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ++ \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$t6, (\$t5) \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t5, \$t5, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# update address \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t4, \$t4, 1 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} bne \$t4, \$t2, lab1
+}
+
+\newpage
+
+\subsection{Accesso per colonne alla matrice}
+Implementazione in MIPS:
+\\[5mm]
+\hspace*{5mm} \textbf{Codice C} \\
+\texttt{
+    \hspace*{4mm} int matrix[5][4]; \\
+    \hspace*{4mm} int i; \\
+    \hspace*{4mm} for (i=0; i < 5; i++) \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} matrix[i][2]++; \\[3mm]
+}
+\hspace*{5mm} \textbf{Codice MIPS assembly} \\
+\texttt{
+    \hspace*{4mm} .data \\
+    \hspace*{4mm} matrix: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 8, 10, 11, 1 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 7, 5, 9, 2 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 6, 11, 0, 3 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 4, 3, 8, 4 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .word 0, 1, 2, 5 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} .text \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .globl main \\
+    \\
+    \hspace*{4mm} main: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$t0, matrix \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t3, \$0, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# column number 2 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sll \$t3, \$t3, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# number of bytes \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t5, \$t0, \$t3 \hspace*{0cm} \hspace*{0cm} \# \$t5:\hspace*{2.1mm}initial address \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# of matrix[0][2] \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# number of rows \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t4, \$0, \$0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t4 = 0 (i) \\
+    \\
+    \hspace*{4mm} Lab1: \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t1, (\$t5) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# matrix[i][2] \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t1, \$t1, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ++ \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$t1, (\$t5) \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t5, \$t5, 16 \hspace*{0cm} \hspace*{0cm} \# update address \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t4, \$t4, 1 \\
+    \hspace*{4mm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} bne \$t4, \$t2, lab1 \\
+}
+
+\newpage
+
+\section{Codice ascii}
+Il codice ASCII (\textit{''American Standard Code for Information
+Interchange"}) è un codice per la codifica dei caratteri (su 8 bit).
+\\[2mm]
+Ogni carattere ha una codifica differente:
+\begin{itemize}
+    \item per esempio, S = \texttt{0x53}, a = \texttt{0x61}, A = \texttt{0x41}
+    \item i caratteri minuscoli e maiuscoli differiscono di \texttt{0x20} (32 posizioni)
+\end{itemize}
+
+\noindent
+\begin{table}[h!]
+    \centering
+    
+    \setlength{\tabcolsep}{4pt}
+    \renewcommand{\arraystretch}{1.5}
+    \definecolor{ccolor}{rgb}{0.67, 0.9, 0.93}
+
+    \begin{tabular}{ V{4} c | c V{4} c | c V{4} c | c V{4} c | c V{4} c | c V{4} c | c V{4} }
+        \hlineB{4}
+        \rowcolor{ccolor}
+        \textbf{\#} & \textbf{carattere} & \textbf{\#} & \textbf{carattere} & \textbf{\#} & \textbf{carattere} & \textbf{\#} & \textbf{carattere} & \textbf{\#} & \textbf{carattere} & \textbf{\#} & \textbf{carattere} \\
+        \hlineB{4}
+        20 & \textit{space} & 30 & $\char"30$ & 40 & $\char"40$ & 50 & $\char"50$ & 60 & $\char"60$ & 70 & $\char"70$ \\
+        \hline
+        21 & $\char"21$ & 31 & $\char"31$ & 41 & $\char"41$ & 51 & $\char"51$ & 61 & $\char"61$ & 71 & $\char"71$ \\
+        \hline
+        22 & $\char"22$ & 32 & $\char"32$ & 42 & $\char"42$ & 52 & $\char"52$ & 62 & $\char"62$ & 72 & $\char"72$ \\
+        \hline
+        23 & $\char"23$ & 33 & $\char"33$ & 43 & $\char"43$ & 53 & $\char"53$ & 63 & $\char"63$ & 73 & $\char"73$ \\
+        \hline
+        24 & $\char"24$ & 34 & $\char"34$ & 44 & $\char"44$ & 54 & $\char"54$ & 64 & $\char"64$ & 74 & $\char"74$ \\
+        \hline
+        25 & $\char"25$ & 35 & $\char"35$ & 45 & $\char"45$ & 55 & $\char"55$ & 65 & $\char"65$ & 75 & $\char"75$ \\
+        \hline
+        26 & $\char"26$ & 36 & $\char"36$ & 46 & $\char"46$ & 56 & $\char"56$ & 66 & $\char"66$ & 76 & $\char"76$ \\
+        \hline
+        27 & $\char"27$ & 37 & $\char"37$ & 47 & $\char"47$ & 57 & $\char"57$ & 67 & $\char"67$ & 77 & $\char"77$ \\
+        \hline
+        28 & $\char"28$ & 38 & $\char"38$ & 48 & $\char"48$ & 58 & $\char"58$ & 68 & $\char"68$ & 78 & $\char"78$ \\
+        \hline
+        29 & $\char"29$ & 39 & $\char"39$ & 49 & $\char"49$ & 59 & $\char"59$ & 69 & $\char"69$ & 79 & $\char"79$ \\
+        \hline
+        2A & $\char"2A$ & 3A & $\char"3A$ & 4A & $\char"4A$ & 5A & $\char"5A$ & 6A & $\char"6A$ & 7A & $\char"7A$ \\
+        \hline
+        2B & $\char"2B$ & 3B & $\char"3B$ & 4B & $\char"4B$ & 5B & $\char"5B$ & 6B & $\char"6B$ & 7B & $\char"7B$ \\
+        \hline
+        2C & $\char"2C$ & 3C & $\char"3C$ & 4C & $\char"4C$ & 5C & $\char"5C$ & 6C & $\char"6C$ & 7C & $\char"7C$ \\
+        \hline
+        2D & $\char"2D$ & 3D & $\char"3D$ & 4D & $\char"4D$ & 5D & $\char"5D$ & 6D & $\char"6D$ & 7D & $\char"7D$ \\
+        \hline
+        2E & $\char"2E$ & 3E & $\char"3E$ & 4E & $\char"4E$ & 5E & $\char"5E$ & 6E & $\char"6E$ & 7E & $\char"7E$ \\
+        \hline
+        2F & $\char"2F$ & 3F & $\char"3F$ & 4F & $\char"4F$ & 5F & $\char"5F$ & 6F & $\char"6F$ & & \\
+        \hlineB{4}
+    \end{tabular}
+    \caption{Elenco di alcuni caratteri in codifica ASCII}
+\end{table}
+
+\vspace*{-6mm}
+
+\subsection*{Esempio con le stringhe}
+\textbf{Codice C} \\
+\texttt{
+    char chararray[5]; \\
+    int i; \\
+    for (i=0 ; i != 5 ; i++) \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} chararray[i] = chararray[i] + ‘a’ – ‘A’; \\[3mm]
+}
+\textbf{Codice MIPS assembly} \\
+\texttt{
+    .data \\
+    charrarray: \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{.ascii "salve"} \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .text \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} .globl main \\
+    \# \$s0 = base address of chararray \\
+    \# \$s1 = i \\
+    \\
+    main: \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$s0, chararray \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s1, \$0, 0 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t0, \$0, 5 \\
+    loop:\hspace*{2.1mm} \hspace*{0cm}beq \$s1, \$t0, done \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t1, \$s0, \$s1 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{lb \$t2, 0(\$t1)} \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$t2, \$t2, -32 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \textbf{sb \$t2, 0(\$t1)} \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s1, \$s1, 1 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j loop \\
+    done: \\
+}
+
+\newpage
+
+\section{Chiamata di sistema}
+Le chiamate di sistema (system call) sono diversificate in base al valore specificato nel
+registro \texttt{\$v0}. \\
+Sovente, il registro \texttt{\$v0} è utilizzato per ritornare
+un valore (valore di ritorno della system call).
+
+\begin{table}[h!]
+    \centering
+    
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}
+    \definecolor{ccolor}{rgb}{0.67, 0.9, 0.93}
+    \begin{tabular}{ V{4} c | c | c V{4} }
+        \hlineB{4}
+        \rowcolor{ccolor}
+        \textbf{Procedura} & \textbf{Codice \texttt{\$v0}} & \textbf{Risultato} \\
+        \hlineB{4}
+        read int & 5 & \texttt{\$v0} contiene il numero da leggere \\
+        \hline
+        print int & 1 & \texttt{\$a0} contiene il numero da stampare \\
+        \hline
+        print string & 4 & \texttt{\$a0} contiene l'indirizzo della stringa \\
+        \hline
+        exit & 10 & fine del programma \\
+        \hline
+        print char & 11 & \texttt{\$a0} contiene il carattere da stampare \\
+        \hline
+        read char & 12 & \texttt{\$v0} contiene il carattere da leggere \\
+        \hlineB{4}
+    \end{tabular}
+    \caption{Elenco dei valori delle chiamate di sistema}
+\end{table}
+
+\subsection*{Esempio 1}
+Esempio di due chiamate di sistema (stampa di una stringa e di un valore intero). \\[3mm]
+\texttt{.data \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} str:\hspace*{2.1mm}.asciiz "the answer is " \# la direttiva .asciiz salva la stringa \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ed inserisce il terminatore \\
+    \\
+    .text \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 4 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# il codice 4 serve per stampare a video una stringa \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$a0, str \hspace*{0cm} \# la system call si aspetta l'indirizzo \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# della stringa passato come parametro \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# il codice 1 serve per stampare a video un intero \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$a0, 5 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# la system call si aspetta un intero \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# passato come parametro \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+}
+
+\subsection*{Esempio 2}
+Esempio di richiesta di due numeri all'utente (input) e
+stampa a video della loro somma (output). \\[3mm]
+\texttt{
+    .data \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} str1: .asciiz "Enter 2 numbers:" \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} str2: .asciiz "The sum is " \\
+    \\
+    .text \\
+    .globl main \\
+    \\
+    main: \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 4 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$a0, str1 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 5 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t0, \$v0, \$0 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 5 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t1, \$v0, \$0 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 4 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} la \$a0, str2 \\
+    \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} li \$v0, 1 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$a0, \$t1, \$t0 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} syscall \\
+}
+
+\end{document}
