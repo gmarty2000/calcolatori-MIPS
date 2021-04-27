@@ -15,7 +15,7 @@ main:
 
 # -----
 # Compute sum of squares from 1 to n.
-    1w $tO, n
+    lw $tO, n
     li $tl, 1   # loop index (1 to n)
     li $t2, 0   # sum
 

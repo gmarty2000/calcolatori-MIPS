@@ -1,0 +1,675 @@
+% Lezione del 19/04/2021
+
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+
+\chapter{Funzione}
+Esiste una convenzione tra i registri tale per cui alcuni dei registri
+devono essere salvati dalla procedura chiamata mentre altri
+registri devono essere chiamati dalla procedura chiamante se
+la procedura chiamante vuole salvaguardarne il contenuto. \\
+
+\section{Convenzione dei registri}
+\begin{table}[h!]
+    \centering
+
+    \setlength{\tabcolsep}{12pt}
+    \renewcommand{\arraystretch}{1.5}
+    \definecolor{ccolor}{rgb}{0.67, 0.9, 0.93}
+    \begin{tabular}{ V{4} >{\centering\arraybackslash}p{4cm} | >{\centering\arraybackslash}p{4cm} V{4} }
+        \hlineB{4}
+        \rowcolor{ccolor}
+        \textbf{Preservati} & \textbf{Non preservati} \\
+        \arrayrulecolor{ccolor!95!black}\hline
+        \rowcolor{ccolor}
+        \textit{Callee saved} & \textit{Caller saved} \\
+        \arrayrulecolor{black}\hlineB{4}
+        \texttt{\$s0-\$s7} & \texttt{\$t0-\$t9} \\
+        \hline
+        \texttt{\$ra} & \texttt{\$a0-\$a3} \\
+        \hline
+        \texttt{\$sp} & \texttt{\$v0-\$v1} \\
+        \hlineB{4}
+    \end{tabular}
+    \caption{Tipologie di registri}
+\end{table}
+
+\subsection*{Colonna di destra}
+Nel sistema di trasferimento dalla procedura chiamante alla
+procedura chiamata ci sono alcuni registri di cui possiamo
+perdere il valore, ossia quando la procedura chiamata lì
+utilizza si sa a priori, se accetta, a priori, il contenuto
+di questi registri viene perso. \\
+Sono le classiche variabili locali di una procedura (scope limitato
+alla procedura). \\[5mm]
+I registri \texttt{\$t0-\$t9} possono essere usati tranquillamente
+dalla procedura senza bisogno che il loro contenuto venga
+preventivamente salvato (per definizione sono temporanei). \\[3mm]
+Domanda: Se il chiamante utilizza il registro \texttt{\$t0} e chiama una procedura,
+che cosa succede al registro \texttt{\$t0}? \\
+Risposta: Viene sovrascritto.
+Se il chiamante ne avesse bisogno di conservare il valore anche
+dopo una chiamata allora è compito del chiamante salvarlo. \\[2mm]
+Domanda: Se ho una procedura che scrive nel registro \$t0, quel registro va
+preventivamente salvato da parte della procedura oppure no? \\
+Risposta: No, deve essere in caso il chiamante a farlo. \\[5mm]
+I registri \texttt{\$a0-\$a3} contengono gli argomenti e
+i registri \texttt{\$v0-\$v1} contengono i valori di ritorno. \\
+Quando esco dalla procedura chiamata e quindi torno al chiamante il valore
+dei registri \texttt{\$a0-\$a3} potrebbe anch'essere stato modificato.
+
+\subsection*{Colonna di sinistra}
+La colonna di sinistra riporta i registri critici: se la funzione
+lì modifica, deve salvarli. \\[5mm]
+Domanda: Se ho una modifica, da parte della funzione chiamante,
+relativamente ai registri \texttt{\$s0-\$s7} e \texttt{\$ra},
+che cosa deve fare la procedura? \\
+Risposta: Deve salvarli nello stack. \\
+I registri \texttt{\$s} ed i registri \texttt{\$t} possono essere
+usati dalle procedure per salvare i dati. La differenza è che i registri
+\texttt{\$t} posso utilizzarli senza preoccuparmi mentre per i registri
+\texttt{\$s} se voglio aggiornarli devo salvare i valori nello stack
+(sono più delicati). \\
+Per ripristinare i valori precedenti, la procedura chiamata
+deve effettuare delle operazioni di push e di pop nello stack
+(internamente nella procedura). \\[3mm]
+Domanda: In quale situazione andiamo ad aggiornare il registro\texttt{\$ra}?
+Risposta: Quando sono presenti delle chiamate annidate di procedure. \\
+Se eseguo un'istruzione \texttt{jal} vado a sovrascrivere \texttt{\$ra}. \\
+Se la mia funzione chiamerà una o più procedure devo salvare il contenuto
+di \texttt{\$ra} nello stack. \\
+Il valore del registro \texttt{\$sp} al momento dell'entrata
+in una procedura dev'essere uguale a quello dell'uscita. \\
+Lo stack pointer non viene salvato nello stack. \\[5mm]
+La procedura ha spazio di manovra in un'area dello stack e non ha
+spazio di manovra in un'altra area dello stack.
+
+\newpage
+
+\section{Definizioni di funzioni}
+Esistono due definizioni di funzioni:
+\begin{itemize}
+    \item \textbf{funzione foglia}: funzione che non chiama nessun'altra funzione
+    \item \textbf{funzione non-foglia}: funzione che chiama altre funzioni
+\end{itemize}
+
+\subsection{Funzione foglia}
+Una funzione foglia non deve salvare i registri non preservati
+(\texttt{\$t0-\$t9}) in quanto non si pone il problema di salvare
+questi registri.
+
+\subsection{Funzione non-foglia}
+Una funzione non-foglia deve salvare i registri non preservati prima che
+chiami un'altra funzione e lì ricarica in seguito. \\[1mm]
+La funzione chiamata deve salvaguardare tutti i registri (\texttt{\$s0-\$s7}, \texttt{\$ra})
+che può modificare.
+
+\subsection*{Esempio}
+Salvataggio dei registri salvati nello stack (funzione foglia).
+\\[5mm]
+\textbf{Codice MIPS assembly} \\
+\texttt{
+    \# \$s0 = result \\
+    diffofsums: \\
+    \textbf{
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, -4 \hspace*{0cm} \# crea spazio nello stack per salvare un registro \\
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$s0, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$s0 nello stack \\
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \underline{non c'è necessità di salvare \$t0 or \$t1} \\
+    }
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t0, \$a0, \$a1 \hspace*{0cm} \# \$t0 = f + g \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t1, \$a2, \$a3 \hspace*{0cm} \# \$t1 = h + i \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sub \$s0, \$t0, \$t1 \hspace*{0cm} \# result = (f + g) - (h + i) \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$v0, \$s0, \$0 \hspace*{0cm} \hspace*{0cm} \# memorizza il valore di ritorno in \$v0 \\
+    \textbf{
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$s0, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$s0 dallo stack \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, 4 \hspace*{0cm} \hspace*{0cm} \# dealloca lo spazio nello stack \\
+    }
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna al chiamante \\
+}
+
+\subsection*{Esempio}
+Chiamata multipla di funzioni (funzioni non-foglia).
+\\[5mm]
+\textbf{Codice MIPS assembly} \\
+\texttt{
+    proc1: \\
+    \textbf{
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, -4 \hspace*{0cm} \# crea spazio nello stack \\
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$ra, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$ra nello stack \\
+    }
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jal proc2 \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots \\
+    \textbf{
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$ra, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$ra dallo stack \\
+        \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, 4 \hspace*{0cm} \hspace*{0cm} \# dealloca lo spazio nello stack \\
+    }
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorno al chiamante \\
+}
+
+\newpage
+
+\subsection*{Esempio}
+Implementazione dell'algoritmo di bubble sort con una procedura di swap
+(\textbf{funzione foglia}).
+\\[5mm]
+\textbf{Codice C} \\
+\texttt{
+    void swap(int v[], int k) \{ \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} int temp; \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} temp = v[k]; \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} v[k] = v[k+1]; \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} v[k+1] = temp; \\
+    \} \\[1mm]
+}
+\texttt{\textbf{v} in \textbf{\$a0}, \textbf{k} in \textbf{\$a1}, \textbf{temp} in \textbf{\$t0}}
+\\[5mm]
+\textbf{Codice MIPS assembly} \\[2mm]
+\begin{tabular}{ l }
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} swap:\hspace*{0cm} sll \$t1, \$a1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = k * 4} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t1, \$a0, \$t1 \hspace*{0cm} \# \$t1 = v+(k*4)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \hspace*{0cm} \hspace*{0cm} (indirizzo di v[k])} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t0, 0(\$t1) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t0 (temp) = v[k]} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t2, 4(\$t1) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t2 = v[k+1]} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$t2, 0(\$t1) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# v[k] = \$t2 (v[k+1])} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$t0, 4(\$t1) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# v[k+1] = \$t0 (temp)} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna alla "calling routine"} \\
+    \hline
+    \hline
+\end{tabular}
+
+\newpage
+
+\subsection*{Esempio}
+Implementazione dell'algoritmo di bubble sort con una procedura di swap
+(\textbf{funzione non-foglia}).
+\\[5mm]
+\textbf{Codice C} \\
+\texttt{
+    void sort (int v[], int n) \{ \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} int i, j; \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} for (i = 0; i $<$ n; i += 1) \{ \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} for (j = i - 1; j $>$= 0 \&\& v[j] $>$ v[j + 1]; j -= 1) \{ \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} swap(v,j); \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \} \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \} \\
+    \} \\[1mm]
+}
+\texttt{\textbf{v} in \textbf{\$a0}, \textbf{n} in \textbf{\$a1}, \textbf{i} in \textbf{\$s0}, \textbf{j} in \textbf{\$s1}}
+\\[5mm]
+\textbf{Codice MIPS assembly} \\[2mm]
+\textit{Corpo della procedura} \\[1mm]
+\begin{tabular}{ l }
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} move \$s2, \$a0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$a0 in \$s2} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} move \$s3, \$a1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$a1 in \$s3} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} move \$s0, \$zero \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# i = 0} \\
+    \texttt{for1tst:\hspace*{0cm} slt \$t0, \$s0, \$s3 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t0 = 0 se \$s0 $\geq$ \$s3 (i $\geq$ n)} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t0, \$zero, exit1 \hspace*{0cm} \# va a exit1 se \$s0 $\geq$ \$s3 (i $\geq$ n)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s1, \$s0, -1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# j = i - 1} \\
+    \texttt{for2tst:\hspace*{0cm} slti \$t0, \$s1, 0 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t0 = 1 se \$s1 < 0 (j < 0)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} bne \$t0, \$zero, exit2 \hspace*{0cm} \# va a exit2 se \$s1 < 0 (j < 0)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sll \$t1, \$s1, 2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t1 = j * 4} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} add \$t2, \$s2, \$t1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t2 = v + (j * 4)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t3, 0(\$t2) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t3 = v[j]} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$t4, 4(\$t2) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t4 = v[j + 1]} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} slt \$t0, \$t4, \$t3 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$t0 = 0 se \$t4 $\geq$ \$t3} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} beq \$t0, \$zero, exit2 \hspace*{0cm} \# va a exit2 se \$t4 $\geq$ \$t3} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} move \$a0, \$s2 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# 1° parametro della swap è v (vecchio \$a0)} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} move \$a1, \$s1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# 2° parametro della swap è j} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jal swap \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# chiama la procedura di swap} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s1, \$s1, -1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# j -= 1} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j for2tst \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salta al test del loop interno} \\
+    \hline
+    \hline
+    \texttt{exit2:\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$s0, \$s0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# i += 1} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} j for1tst \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salta al test del loop esterno} \\
+    \hline
+    \hline
+\end{tabular}
+
+\vspace*{5mm}
+
+\noindent
+\textit{Procedura completa} \\[1mm]
+\begin{tabular}{ l }
+    \hline
+    \hline
+    \texttt{sort:\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, -20 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# crea spazio nello stack per 5 registri \hspace*{0cm} \hspace*{0cm} } \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$ra, 16(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$ra nello stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$s3, 12(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$s3 nello stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$s2, 8(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$s2 nello stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$s1, 4(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$s1 nello stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} sw \$s0, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$s0 nello stack} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# corpo della procedura} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots} \\
+    \hline
+    \hline
+    \texttt{exit1:\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$s0, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$s0 dallo stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$s1, 4(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$s1 dallo stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$s2, 8(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$s2 dallo stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$s3, 12(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$s3 dallo stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lw \$ra, 16(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$ra dallo stack} \\
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, 20 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina lo stack pointer} \\
+    \hline
+    \hline
+    \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna alla routine chiamante} \\
+    \hline
+    \hline
+\end{tabular}
+
+\newpage
+
+\subsection*{Esempio}
+Chiamata ad una funzione ricorsiva.
+\begin{table}[h!]
+    \textbf{Codice C} \\[2mm]
+    \begin{minipage}{.5\linewidth}
+        \texttt{\texttt{int factorial(int n) \{} \\
+            \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} if (n <= 1)} \\
+            \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} return 1;} \\
+            \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} else} \\
+            \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} return (n * factorial(n - 1));} \\
+            \texttt{\}} \\
+        }
+    \end{minipage}
+    \begin{minipage}{.5\linewidth}
+        \texttt{\{ \\
+            \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} int y; \\
+            \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots \\
+            \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} y = factorial(3); \\
+            \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \dots \\
+            \} \\
+        }
+    \end{minipage}
+\end{table}
+\\[5mm]
+\textbf{Codice MIPS assembly} \\[2mm]
+\begin{tabular}{ l l l }
+    \textbf{\texttt{0x90}} & \texttt{factorial:} & \texttt{addi \$sp, \$sp, -8 \hspace*{0cm} \# crea spazio nello stack} \\
+    \textbf{\texttt{0x94}} & & \texttt{sw \$a0, 4(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$a0 nello stack} \\
+    \textbf{\texttt{0x98}} & & \texttt{sw \$ra, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# salva \$ra nello stack} \\
+    \textbf{\texttt{0x9C}} & & \texttt{addi \$t0, \$0, 2 } \\
+    \textbf{\texttt{0xA0}} & & \texttt{slt \$t0, \$a0, \$t0 \hspace*{0cm} \# a <= 1 ?} \\
+    \textbf{\texttt{0xA4}} & & \texttt{beq \$t0, \$0, else \hspace*{0cm} \# no:\hspace*{0cm} va a else} \\
+    \textbf{\texttt{0xA8}} & & \texttt{addi \$v0, \$0, 1 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# si:\hspace*{0cm} restituisce 1} \\
+    \textbf{\texttt{0xAC}} & & \texttt{addi \$sp, \$sp, 8 \hspace*{0cm} \hspace*{0cm} \# ripristina \$sp} \\
+    \textbf{\texttt{0xB0}} & & \texttt{jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna alla funzione chiamante} \\
+    \textbf{\texttt{0xB4}} & \texttt{else:} & \texttt{addi \$a0, \$a0, -1 \hspace*{0cm} \# n = n - 1} \\
+    \textbf{\texttt{0xB8}} & & \texttt{jal factorial \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# chiamata ricorsiva} \\
+    \textbf{\texttt{0xBC}} & & \texttt{lw \$ra, 0(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$ra dallo stack} \\
+    \textbf{\texttt{0xC0}} & & \texttt{lw \$a0, 4(\$sp) \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ripristina \$a0 dallo stack} \\
+    \textbf{\texttt{0xC4}} & & \texttt{addi \$sp, \$sp, 8 \hspace*{0cm} \hspace*{0cm} \# ripristina \$sp} \\
+    \textbf{\texttt{0xC8}} & & \texttt{mul \$v0, \$a0, \$v0 \hspace*{0cm} \# n * factorial(n - 1)} \\
+    \textbf{\texttt{0xCC}} & & \texttt{jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna alla funzione chiamante} \\
+\end{tabular}
+
+\begin{table}[h!]
+    \begin{minipage}{.33\linewidth}
+        \begin{tikzpicture}
+            \node(table) {
+                \renewcommand{\arraystretch}{1.2}
+                \setlength{\dashlinegap}{2pt}
+                \setlength{\tabcolsep}{6pt}
+                \begin{tabular}{ c | >{\centering\arraybackslash}p{1.75cm} | }
+                    \multicolumn{1}{c}{\textbf{\small Indirizzo}} & \multicolumn{1}{c}{\textbf{\small Dato}} \\
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                    \cline{2-2}
+                    \texttt{FC} & \\
+                    \cline{2-2}
+                    \texttt{F8} & \\
+                    \cline{2-2}
+                    \texttt{F4} & \\
+                    \cline{2-2}
+                    \texttt{F0} & \\
+                    \cline{2-2}
+                    \texttt{EC} & \\
+                    \cline{2-2}
+                    \texttt{E8} & \\
+                    \cline{2-2}
+                    \texttt{E4} & \\
+                    \cline{2-2}
+                    \texttt{E0} & \\
+                    \cline{2-2}
+                    \texttt{DC} & \\
+                    \cline{2-2}
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                \end{tabular}
+            };
+    
+            \draw [<-, thick]
+                (2.3,1.75) -- (2.8,1.75);
+            \node[text width=5cm, align=center] at (3.2,1.75) {\texttt{\textbf{\$sp}}};
+    
+        \end{tikzpicture}
+    \end{minipage}
+    \begin{minipage}{.33\linewidth}
+        \begin{tikzpicture}
+            \node(table) {
+                \renewcommand{\arraystretch}{1.2}
+                \setlength{\dashlinegap}{2pt}
+                \setlength{\tabcolsep}{6pt}
+                \begin{tabular}{ c | >{\centering\arraybackslash}p{1.75cm} | }
+                    \multicolumn{1}{c}{\textbf{\small Indirizzo}} & \multicolumn{1}{c}{\textbf{\small Dato}} \\
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                    \cline{2-2}
+                    \texttt{FC} & \\
+                    \cline{2-2}
+                    \texttt{F8} & \texttt{\footnotesize \$a0 (0x3)} \\
+                    \cline{2-2}
+                    \texttt{F4} & \texttt{\footnotesize \$ra} \\
+                    \cline{2-2}
+                    \texttt{F0} & \texttt{\footnotesize \$a0 (0x2)} \\
+                    \cline{2-2}
+                    \texttt{EC} & \texttt{\footnotesize \$ra (0xBC)} \\
+                    \cline{2-2}
+                    \texttt{E8} & \texttt{\footnotesize \$a0 (0x1)} \\
+                    \cline{2-2}
+                    \texttt{E4} & \texttt{\footnotesize \$ra (0xBC)} \\
+                    \cline{2-2}
+                    \texttt{E0} & \\
+                    \cline{2-2}
+                    \texttt{DC} & \\
+                    \cline{2-2}
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                \end{tabular}
+            };
+    
+            \draw [<-, thick]
+                (2.3,1.75) -- (2.8,1.75);
+            \node[text width=5cm, align=center] at (3.2,1.75) {\texttt{\$sp}};
+
+            \draw [<-, thick]
+                (2.3,.75) -- (2.8,.75);
+            \node[text width=5cm, align=center] at (3.2,.75) {\texttt{\$sp}};
+
+            \draw [<-, thick]
+                (2.3,-.25) -- (2.8,-.25);
+            \node[text width=5cm, align=center] at (3.2,-.25) {\texttt{\$sp}};
+
+            \draw [<-, thick]
+                (2.3,-1.3) -- (2.8,-1.3);
+            \node[text width=5cm, align=center] at (3.2,-1.3) {\texttt{\$sp}};
+    
+        \end{tikzpicture}
+    \end{minipage}
+    \begin{minipage}{.33\linewidth}
+        \begin{tikzpicture}
+            \node(table) {
+                \renewcommand{\arraystretch}{1.2}
+                \setlength{\dashlinegap}{2pt}
+                \setlength{\tabcolsep}{6pt}
+                \begin{tabular}{ c | >{\centering\arraybackslash}p{1.75cm} | }
+                    \multicolumn{1}{c}{\textbf{\small Indirizzo}} & \multicolumn{1}{c}{\textbf{\small Dato}} \\
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                    \cline{2-2}
+                    \texttt{FC} & \\
+                    \cline{2-2}
+                    \texttt{F8} & \texttt{\footnotesize \$a0 (0x3)} \\
+                    \cline{2-2}
+                    \texttt{F4} & \texttt{\footnotesize \$ra} \\
+                    \cline{2-2}
+                    \texttt{F0} & \texttt{\footnotesize \$a0 (0x2)} \\
+                    \cline{2-2}
+                    \texttt{EC} & \texttt{\footnotesize \$ra (0xBC)} \\
+                    \cline{2-2}
+                    \texttt{E8} & \texttt{\footnotesize \$a0 (0x1)} \\
+                    \cline{2-2}
+                    \texttt{E4} & \texttt{\footnotesize \$ra (0xBC)} \\
+                    \cline{2-2}
+                    \texttt{E0} & \\
+                    \cline{2-2}
+                    \texttt{DC} & \\
+                    \cline{2-2}
+                    \multicolumn{1}{ c : }{\vdots} & \multicolumn{1}{ c : }{\vdots} \\
+                \end{tabular}
+            };
+    
+            \draw [<-, thick]
+                (2.3,1.75) -- (2.8,1.75);
+            \node[text width=5cm, align=center] at (3.2,1.75) {\texttt{\textbf{\$sp}}};
+
+            \draw [<-, thick]
+                (2.3,.75) -- (2.8,.75);
+            \node[text width=5cm, align=center] at (3.2,.75) {\texttt{\$sp}};
+
+            \draw [<-, thick]
+                (2.3,-.25) -- (2.8,-.25);
+            \node[text width=5cm, align=center] at (3.2,-.25) {\texttt{\$sp}};
+
+            \draw [<-, thick]
+                (2.3,-1.3) -- (2.8,-1.3);
+            \node[text width=5cm, align=center] at (3.2,-1.3) {\texttt{\$sp}};
+    
+        \end{tikzpicture}
+    \end{minipage}
+\end{table}
+
+\newpage
+
+\subsection{Argomenti aggiuntivi}
+Se le funzioni hanno più di 4 argomenti bisogna utilizzare lo stack,
+ovvero la \textit{funzione chiamante} deve espanderlo per creare lo spazio
+per gli eventuali elementi addizionali e occuparsi della scrittura
+in esso prima che venga chiamata la \textit{funzione chiamata}.
+
+\subsection*{Esempio}
+\textbf{Codice C} \\
+\texttt{Res = addem(num1, num2, num3, num4, num5);
+/* num1 + num2 + num3 + num4 + num5 */} \\[5mm]
+\textbf{Codice MIPS assembly}
+\begin{table}[h!]
+    \setlength{\tabcolsep}{30pt}
+    \begin{tabular}{ l | l | l }
+        \texttt{.data} & \texttt{.text} & \texttt{.globl addem} \\
+        \texttt{num1:\hspace{2.1mm}.word 1} & \texttt{.globl main} & \texttt{.ent addem} \\
+        \texttt{num2:\hspace{2.1mm}.word 2} & \texttt{.ent main} \\
+        \texttt{num3:\hspace{2.1mm}.word 3} & \texttt{main:} & \texttt{addem:} \\
+        \texttt{num4:\hspace{2.1mm}.word 4} & \texttt{lw \$a0, num1} \\
+        \texttt{num5:\hspace{2.1mm}.word 5} & \texttt{lw \$a1, num2} & \texttt{addi \$v0, \$0, 0} \\
+        \texttt{sum:\hspace{4.2mm}.word 0} & \texttt{lw \$a2, num3} \\
+        & \texttt{lw \$a3, num4} & \texttt{add \$v0, \$v0, \$a0} \\
+        & \texttt{lw \$t0, num5} & \texttt{add \$v0, \$v0, \$a1} \\
+        & & \texttt{add \$v0, \$v0, \$a2} \\
+        & \texttt{addi \$sp, \$sp, -4} & \texttt{add \$v0, \$v0, \$a3} \\
+        & \texttt{sw \$t0, 0(\$sp)} \\
+        & & \texttt{lw \$t0, (\$sp)} \\
+        & \texttt{jal addem} \\
+        & & \texttt{add \$v0, \$v0, \$t0} \\
+        & \texttt{sw \$v0, sum} \\
+        & \texttt{addi \$sp, \$sp, 4} & \texttt{jr \$ra} \\
+        & & \texttt{.end addem} \\
+        & \texttt{li \$v0, 10} \\
+        & \texttt{syscall} \\
+        & \texttt{.end main} \\
+    \end{tabular}
+\end{table}
+
+\subsection{Variabili locali}
+Le variabili locali tipicamente sono implementate attraverso i registri
+\texttt{\$t0-\$t9} finché è sufficiente lo spazio disponibile.
+Se ci sono troppe variabili locali oppure se ho un array locale
+bisogna utilizzare lo stack.
+
+\subsection*{Esempio}
+Scrivere una procedura usando un array locale di 10 interi e chiamare
+le procedure per la lettura, inversione e stampa dell'array. \\[5mm]
+\textbf{Codice C} \\[2mm]
+\texttt{
+    void proc1() \{ \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} int array[10]; \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} read(array, 10); \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} reverse(array, 10); \\
+    \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} print(array, 10); \\
+    \} \\[5mm]
+}
+\textbf{Codice MIPS assembly}
+\begin{table}[h!]
+    \begin{minipage}{.75\linewidth}
+        \texttt{proc1: \\
+            \hspace*{0cm} \hspace*{0cm} addi sp, \$sp, -44 \# alloca lo stack frame (= 44 bytes) \\
+            \hspace*{0cm} \hspace*{0cm} sw \$ra, 40(\$sp) \hspace*{0cm} \hspace*{0cm} \# salva \$ra nello stack \\
+            \hspace*{0cm} \hspace*{0cm} move \$a0, \$sp \# \$a0 = indirizzo dell'array nello stack \\
+            \hspace*{0cm} \hspace*{0cm} li \$a1, 10 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$a1 = 10 \\
+            \hspace*{0cm} \hspace*{0cm} jal read \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# chiama la funzione read \\
+            \hspace*{0cm} \hspace*{0cm} move \$a0, \$sp \# \$a0 = indirizzo dell'array nello stack \\
+            \hspace*{0cm} \hspace*{0cm} li \$a1, 10 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$a1 = 10 \\
+            \hspace*{0cm} \hspace*{0cm} jal reverse \hspace*{0cm} \hspace*{0cm} \# chiama la funzione reverse \\
+            \hspace*{0cm} \hspace*{0cm} move \$a0, \$sp \# \$a0 = indirizzo dell'array nello stack \\
+            \hspace*{0cm} \hspace*{0cm} li \$a1, 10 \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# \$a1 = 10 \\
+            \hspace*{0cm} \hspace*{0cm} jal print \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# chiama la funzione print \\
+            \hspace*{0cm} \hspace*{0cm} lw \$ra, 40(\$sp) \hspace*{0cm} \hspace*{0cm} \# carica \$ra dallo stack \\
+            \hspace*{0cm} \hspace*{0cm} addi \$sp, \$sp, 44 \# libera lo stack frame (= 44 bytes) \\
+            \hspace*{0cm} \hspace*{0cm} jr \$ra \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \hspace*{0cm} \# ritorna al chiamante \\
+        }
+    \end{minipage}
+    \begin{minipage}{.2\linewidth}
+        \begin{tabular}{ | c | r }
+            \cline{1-1}
+            \\ \\
+            \cline{1-1}
+            \texttt{old \$ra} & \texttt{40(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[9]} & \texttt{36(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[8]} & \texttt{32(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[7]} & \texttt{28(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[6]} & \texttt{24(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[5]} & \texttt{20(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[4]} & \texttt{16(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[3]} & \texttt{12(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[2]} & \texttt{8(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[1]} & \texttt{4(\$sp)} \\
+            \cline{1-1}
+            \texttt{array[0]} & \texttt{0(\$sp)} \\
+            \cline{1-1}
+            \\ \\
+            \cline{1-1}
+        \end{tabular}
+    \end{minipage}
+\end{table}
+
+\section{Frame Pointer}
+Il Frame Pointer è un registro che punta ad una certa posizione
+nello stack e serve per separare i valori dei registri
+dagli argomenti addizionali in due aree diverse dello stack.
+
+\begin{table}[h!]
+    \centering
+
+    \begin{minipage}{.4\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \node(table) {
+                \begin{tabular}{ | c | }
+                    \hline
+                    \cellcolor{brown!75} \makecell{\hspace*{0cm} \\ \hspace*{2.3cm} \\ \hspace*{0cm}} \\
+                    \hline
+                    \cellcolor{blue!50} \makecell{\textbf{\texttt{Argomenti}} \\ \textbf{\texttt{aggiuntivi}}\hspace*{2mm}} \\
+                    \hline
+                    \\ \\
+                    \\ \\
+                    \\ \\
+                    \\ \\
+                    \\ \\ \\
+                    \\ \\ \\
+                    \hline
+                    \multicolumn{1}{c}{\multirow{3}{*}{\makecell{Prima \\ della chiamata}}} \\
+                \end{tabular}
+            };
+    
+            \draw [<-, thick]
+                (1.42,2.1) -- (3.42,2.1);
+            \node[text width=5cm, align=center] at (2.42,2.35) {\texttt{\$sp}};
+    
+        \end{tikzpicture}
+    \end{minipage}
+    \begin{minipage}{.4\linewidth}
+        \centering
+        \begin{tikzpicture}
+            \node(table) {
+                \begin{tabular}{ | c | }
+                    \hline
+                    \cellcolor{brown!75} \makecell{\hspace*{0cm} \\ \hspace*{2.3cm} \\ \hspace*{0cm}} \\
+                    \hline
+                    \cellcolor{blue!50} \makecell{\textbf{\texttt{Argomenti}} \\ \textbf{\texttt{aggiuntivi}}\hspace*{2mm}} \\
+                    \hline
+                    \cellcolor{yellow!50} \makecell{\texttt{\$fp} \\ \textit{(se necessario)}} \\
+                    \hline
+                    \cellcolor{yellow!50} \makecell{\texttt{\$a0-\$a3} \\ \textit{(se necessari)\hspace*{2mm}}} \\
+                    \hline
+                    \cellcolor{yellow!50} \makecell{\texttt{\$ra} \\ \textit{(se necessario)}} \\
+                    \hline
+                    \cellcolor{yellow!50} \makecell{\texttt{\$s0-\$s7} \\ \textit{(se necessari)\hspace*{2mm}}} \\
+                    \hline
+                    \cellcolor{yellow!50} \makecell{\texttt{Variabili}\hspace*{4mm} \\ \texttt{locali} \\ \texttt{e array}} \\
+                    \hline
+                    \\ \\ \\
+                    \hline
+                    \multicolumn{1}{c}{\multirow{3}{*}{\makecell{Dopo \\ la chiamata}}} \\
+                \end{tabular}
+            };
+    
+            \draw [<-, thick]
+                (1.42,2.135) -- (3.42,2.135);
+            \node[text width=5cm, align=center] at (2.42,1.885) {\texttt{\$fp}};
+
+            \draw [decorate,decoration={brace,amplitude=10pt,mirror,raise=4pt},yshift=0pt]
+                (-1.5,2.135) -- (-1.5,-2.575) node [black,midway,xshift=-0.8cm,rotate=90]
+                {Registri salvati};
+
+            \draw [<-, thick]
+                (1.42,-2.575) -- (3.42,-2.575);
+            \node[text width=5cm, align=center] at (2.42,-2.325) {\texttt{\$sp}};
+    
+        \end{tikzpicture}
+    \end{minipage}
+\end{table}
+
+\section{Riassunto: chiamata ad una funzione}
+La funzione chiamante deve:
+\begin{itemize}
+    \item mettere gli argomenti nei registri \texttt{\$a0-\$a3}
+    \item salvare eventuali registri che voglio mantenere (\texttt{\$ra},
+    eventualmente \texttt{\$t0-t9})
+    \item \texttt{jal callee}
+    \item ripristina i registri che ha salvato
+    \item guarda il risultato in \texttt{\$v0}
+\end{itemize}
+\vspace*{5mm}
+La funzione chiamata deve:
+\begin{itemize}
+    \item salvare tutti i registri di tipo \texttt{\$s} su cui va a fare un aggiornamento
+    \item esegue l'istruzione
+    \item salva il risultato in \texttt{\$v0}
+    \item ripristina i registri che ha salvato
+    \item \texttt{jr \$ra}
+\end{itemize}
+
+\end{document}
