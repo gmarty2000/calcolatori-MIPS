@@ -152,7 +152,7 @@ tipologia di istruzioni).
 \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} lui \textbf{\$at}, n \# load upper 16 bits of label} \\
 \texttt{\hspace*{0cm} \hspace*{0cm} \hspace*{0cm} ori \$t0, \textbf{\$at}, m \# lower 16 bits of label}
 
-\section{Altre pseudoistruzioni}
+\section{Moltiplicazione e divisione}
 La moltiplicazione (\texttt{mul}) e la divisione sono delle macroistruzioni
 in quanto si basano su più istruzioni.
 \begin{table}[h!]
@@ -163,6 +163,16 @@ in quanto si basano su più istruzioni.
         & \texttt{mult rs, rt} & & & \texttt{break \$0} \\
         & \texttt{mflo rd} & & \texttt{ok:} & \texttt{div rs, rt} \\
         & & & & \texttt{mflo rd}
+    \end{tabular}
+\end{table}
+
+\section{Altre pseudoistruzioni}
+Qui di seguito sono presenti altre pseudoistruzioni utili.
+\begin{table}[h!]
+    \begin{tabular}{ l l l }
+        \texttt{clear \$t0} & \texttt{add \$t0, \$0, \$0} & Azzera il valore del registro \\
+        \texttt{move \$s1, \$s2} & \texttt{add \$s1, \$s2, \$0} & Copia il contenuto del registro sorgente in quello di destinazione \\
+        \texttt{nop} & \texttt{or \$0, \$0, \$0} & È un'istruzione che non fa niente (ritardo) \\
     \end{tabular}
 \end{table}
 
@@ -208,11 +218,11 @@ delle istruzioni di salto.
 
 \section{Controllo del flusso}
 Le seguenti istruzioni servono per fare i salti e permettono
-di definire un controllo del flusso all'interno del codice.
-I salti possono essere di diverso tipo:
+di definire un controllo del flusso nel codice. \\
+Nella terminologia MIPS i salti si dividono in 2 tipologie:
 \begin{itemize}
-    \item condizionali
-    \item incondizionali
+    \item per \underline{branch} si intende un \textbf{salto condizionato}
+    \item per \underline{jump} si intende un \textbf{salto incondizionato}
 \end{itemize}
 
 \vspace{2mm}
@@ -230,7 +240,7 @@ Se l'istruzione di salto viene eseguita
     eseguo anche il codice contenuto al suo interno
 \end{itemize}
 
-\subsection{Salto condizionale}
+\subsection{Salto condizionale (branch)}
 È un tipo di salto che valuta una condizione.
 \begin{itemize}
     \item se due operandi sono uguali, si usa la \texttt{beq}
@@ -283,7 +293,7 @@ L'istruzione \texttt{bne} fa un confronto tra i due registri e, se il loro conte
 
 \newpage
 
-\subsection{Salto incondizionale}
+\subsection{Salto incondizionale (jump)}
 È un tipo di salto che viene effettuato senza nessuna condizione predefinita.
 \begin{itemize}
     \item in questa categoria ci sono le istruzioni
@@ -556,7 +566,7 @@ Ciclo con la condizione di minore.
 \noindent
 \underline{\textbf{Nota bene}: \texttt{\$t1 = 1 se i $<$ 101}}
 
-\section{Confronti con pseudoistruzioni}
+\section{Pseudoistruzioni branch}
 Per semplificare la scrittura del codice, sono state implementate alcune
 pseudoistruzioni per effettuare i confronti tra le grandezze. \\
 Di seguito, è presente una lista delle pseudoistruzioni disponibili.
