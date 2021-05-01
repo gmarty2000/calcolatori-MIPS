@@ -1,7 +1,136 @@
 \documentclass[12pt]{standalone}
 \usepackage{circuitikz}
+
+\usetikzlibrary{shapes.geometric}
+
+\ctikzset{multipoles/flipflop/clock wedge size=0.4}
+
+\tikzset{register/.style={flipflop,
+    flipflop def={t2=$\,$, t5=$\,$, cu=1},
+    transform shape,
+    scale=.5
+}}
+
+\tikzset{two io register/.style={flipflop,
+    flipflop def={t1=$\,$, t3=$\,$, t4=$\,$, t6=$\,$, cu=1},
+    transform shape,
+    scale=.5
+}}
+
+\tikzset{two input mux/.style={muxdemux,
+    muxdemux def={Lh=4, Rh=2, NL=2, NT=1, NB=0, NR=1},
+    scale=.4
+}}
+
+\tikzset{four input mux/.style={muxdemux,
+    muxdemux def={Lh=6, Rh=4, NL=4, NT=1, NB=0, NR=1},
+    scale=.4
+}}
+
+\ctikzset{multipoles/dipchip/width=2.5,
+          multipoles/dipchip/pin spacing = 0.75}
+
 \begin{document}
-    \begin{circuitikz}
-        % --> DRAWING HERE <--
-    \end{circuitikz}
+
+\begin{tikzpicture}
+    
+    %COMPONENTS---------------
+
+    %Program Counter
+    \node[register] (PC) at (0,0) {PC};
+    
+    %PC Mux
+    \node[two input mux] (PC_mux) at ($ (PC) + (2,-.225) $) {};
+    \node[right, font=\tiny] at (PC_mux.lpin 1) {0};
+    \node[right, font=\tiny] at (PC_mux.lpin 2) {1};
+
+    %Instr/Data Memory
+    \node[dipchip, num pins=6, hide numbers, no topmark, align=center, external pins width=0] (memory) at ($ (PC_mux) + (3,0) $) {\scriptsize\textbf{Instr/Data} \\ \scriptsize\textbf{Memory}};
+    \draw (memory.bpin 1) ++(0,0.2) -- ++(0.2,-0.2) node[right, font=\tiny] {CLK} -- ++(-0.2,-0.2);
+    \node[right, font=\tiny] at (memory.bpin 2) {A};
+    \node[right, font=\tiny] at (memory.bpin 3) {WD};
+    \node[left, font=\tiny] at (memory.bpin 5) {RD};
+    \node[below, font=\tiny] at (memory.n) {WE};
+
+    %Instruction register
+    \node[register] (IR) at ($ (memory.bpin 5) + (2,0) $) {IR};
+
+    %Register File
+    \node[dipchip, num pins=10, hide numbers, no topmark, align=center, external pins width=0] (regfile) at ($ (IR) + (6.5,-1) $) {\scriptsize\textbf{Register} \\ \scriptsize\textbf{File}};
+    \draw (regfile.bpin 1) ++(0,0.2) -- ++(0.2,-0.2) node[right, font=\tiny] {CLK} -- ++(-0.2,-0.2);
+    \node[right, font=\tiny] at (regfile.bpin 2) {A1};
+    \node[right, font=\tiny] at (regfile.bpin 3) {A2};
+    \node[right, font=\tiny] at (regfile.bpin 4) {A3};
+    \node[right, font=\tiny] at (regfile.bpin 5) {WD3};
+    \node[left, font=\tiny] at (regfile.bpin 9) {RD2};
+    \node[left, font=\tiny] at (regfile.bpin 10) {RD1};
+    \node[below, font=\tiny] at (regfile.n) {WE3};
+
+    %RegDst Mux
+    \node[two input mux] (RegDst_mux) at ($ (regfile.bpin 4) - (2,0) $) {};
+    \node[right, font=\tiny] at (RegDst_mux.lpin 1) {0};
+    \node[right, font=\tiny] at (RegDst_mux.lpin 2) {1};
+    
+    %MemToReg Mux
+    \node[two input mux] (MemToReg_mux) at ($ (regfile.bpin 5) - (1,0) $) {};
+    \node[right, font=\tiny] at (MemToReg_mux.lpin 1) {0};
+    \node[right, font=\tiny] at (MemToReg_mux.lpin 2) {1};
+    
+    %Data register
+    \node[register] (Data) at (IR |- MemToReg_mux.lpin 2) {Data};
+
+    %Operand register
+    \node[two io register] (Operand) at ($ (regfile.bpin 9) !0.5! (regfile.bpin 10) + (2,0) $) {Operand};
+    \node[left, font=\tiny] at ($ (Operand.pin 4) - (.05,0) $) {B};
+    \node[left, font=\tiny] at ($ (Operand.pin 6) - (.05,0) $) {A};
+
+    %SrcA mux
+    \node[two input mux] (SrcA_mux) at ($ (Operand.pin 6) + (1,.225) $) {};
+    \node[right, font=\tiny] at (SrcA_mux.lpin 1) {0};
+    \node[right, font=\tiny] at (SrcA_mux.lpin 2) {1};
+
+    %SrcB mux
+    \node[four input mux] (SrcB_mux) at ($ (Operand.pin 4) + (2,-.505) $) {};
+    \node[right, font=\tiny] at (SrcB_mux.lpin 1) {00};
+    \node[right, font=\tiny] at (SrcB_mux.lpin 2) {01};
+    \node[right, font=\tiny] at (SrcB_mux.lpin 3) {10};
+    \node[right, font=\tiny] at (SrcB_mux.lpin 4) {11};
+
+    %ALU
+    \node[ALU, scale=.8, font=\tiny] (ALU) at ($ (SrcA_mux) !0.5! (SrcB_mux) + (2,0) $) {\rotatebox{90}{ALU}};
+
+    %ALU result register
+    \node[register, align=center] (ALURes) at ($ (ALU) + (2,0) $) {ALU \\ Result};
+    
+    %ALU result mux
+    \node[two input mux] (ALURes_mux) at ($ (ALURes) + (2,.225) $) {};
+    \node[right, font=\tiny] at (ALURes_mux.lpin 1) {0};
+    \node[right, font=\tiny] at (ALURes_mux.lpin 2) {1};
+
+    %Sign extend
+    \node[draw, rectangle, align=center, font=\scriptsize, minimum height=.7cm] at ($ (regfile) - (0,5) $) {Sign Extend};
+
+    %<<2
+    \node[trapezium,draw,trapezium left angle=120,trapezium right angle=60,trapezium stretches=true,minimum height=.5cm, font=\scriptsize\ttfamily] (ll2) at ($ (SrcB_mux) - (1,2) $) {<<2}; 
+
+    %Control Unit
+    \node[dipchip, num pins=14, hide numbers, no topmark, align=center, external pins width=0, circuitikz/multipoles/dipchip/pin spacing = 0.5] (CU) at (12.5,5) {\rotatebox{90}{\scriptsize \textbf{Control Unit}}};
+    \draw (CU.bpin 2) ++(0,0.2) -- ++(0.2,-0.2) node[right, font=\tiny] {CLK} -- ++(-0.2,-0.2);
+    \node[right, font=\tiny] at (CU.bpin 3) {IorD};
+    \node[right, font=\tiny] at (CU.bpin 4) {MemWrite};
+    \node[right, font=\tiny] at (CU.bpin 5) {IRWrite};
+    \node[right, font=\tiny] at (CU.bpin 6) {Op};
+    \node[right, font=\tiny] at (CU.bpin 7) {Funct};
+    \node[left, font=\tiny] at (CU.bpin 8) {RegWrite};
+    \node[left, font=\tiny] at (CU.bpin 9) {ALUSrcA};
+    \node[left, font=\tiny] at (CU.bpin 10) {ALUSrcB};
+    \node[left, font=\tiny] at (CU.bpin 11) {ALUControl};
+    \node[left, font=\tiny] at (CU.bpin 12) {PCSrc};
+    \node[left, font=\tiny] at (CU.bpin 13) {Branch};
+    \node[left, font=\tiny] at (CU.bpin 14) {PCWrite};
+
+    %-------------------------
+
+\end{tikzpicture}
+
 \end{document}
