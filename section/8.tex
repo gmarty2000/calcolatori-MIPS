@@ -1,0 +1,119 @@
+% Lezione del 28/04/2021
+
+\documentclass[../main.tex]{subfiles}
+
+\begin{document}
+    \chapter{Architettura MIPS}
+    Approfondimento del MIPS con visione della sua architettura.
+    \section{Introduzione}
+    Qui di seguito è rappresentato un esempio semplificato
+    dell'architettura MIPS.
+
+    \begin{figure}[h!]
+        \centering
+
+        \vspace*{1cm}
+        \includegraphics[width=\linewidth]{image/MIPS_architecture}
+        \newline
+        \caption{Architettura MIPS semplificata}
+        \vspace*{1cm}
+    \end{figure}
+
+    \noindent
+    Il disegno si divide in due parti:
+    \begin{itemize}
+        \item la parte nera è l'unità di elaborazione (Data Path)
+        \item la parte blu è l'unità di controllo (Control Unit)
+    \end{itemize}
+
+    \newpage
+
+    \subsection{Memoria}
+    La memoria non fa parte del processore (è esterna). \\[3mm]
+    La memoria ha:
+    \begin{itemize}
+        \item un Address Bus, \texttt{Adr}
+        \item un Data Bus "diviso" in due parti:
+        \begin{itemize}
+            \item una parte che mi da l'informazione
+            nel caso in cui sto facendo una lettura, \texttt{RD}
+            \item una parte che contiene il dato che devo scrivere \texttt{WD}
+        \end{itemize}
+    \end{itemize}
+    
+    \begin{figure}[h!]
+        \centering
+
+        \vspace*{5mm}
+        \includegraphics[width=\linewidth]{image/MIPS_architecture}
+        \newline
+        \caption{Architettura MIPS - Memoria}
+        \vspace*{5mm}
+    \end{figure}
+
+    Ad ogni colpo di clock, la memoria esegue una determinata operazione
+    (lettura o scrittura) in base al valore del segnale di controllo
+    "Write Enable" (\texttt{WE}):
+    \begin{itemize}
+        \item se vale 0 leggo in \texttt{RD} quello che c'è all'indirizzo di \texttt{A}
+        \item se vale 1 scrivo il contenuto di \texttt{WD} all'indirizzo specificato in \texttt{A}
+    \end{itemize}
+    \vspace*{1mm}
+    \underline{\textbf{Nota bene}: La memoria non ha
+    un segnale di abilitazione.}
+
+    \newpage
+
+    \subsection{Il pacchetto di registri}
+    In totale esistono 32 registri nel MIPS (codificati da 5 bit).
+
+    \begin{figure}[h!]
+        \centering
+
+        \vspace*{5mm}
+        \includegraphics[width=\linewidth]{image/MIPS_architecture}
+        \newline
+        \caption{Architettura MIPS - Pacchetto dei registri}
+        \vspace*{5mm}
+    \end{figure}
+
+    Il set di registri è una memoria di tipo "Dual port" ossia mi
+    permette di leggere ad ogni colpo di clock 2 word e quindi
+    specifico 2 indirizzi. \\[1mm]
+    Le parole \texttt{A1} e \texttt{A2} portano portano un'informazione
+    di qual'è il registro che andrò a leggere
+    in \texttt{RD1} e in \texttt{RD2}. \\
+    Il set di registri è pilotato da un segnale di controllo
+    \texttt{WE3} che:
+    \begin{itemize}
+        \item in lettura va a leggere il contenuto del registro
+        specificato:
+        \begin{itemize}
+            \item o da \texttt{A1} e lo legge in \texttt{RD1}
+            \item o da \texttt{A2} e lo legge in \texttt{RD2}
+        \end{itemize}
+        \item in scrittura va a prendere l'indirizzo in \texttt{A3}
+        e il dato in \texttt{WD3}
+    \end{itemize}
+
+    \subsection{I registri}
+
+    \begin{figure}[h!]
+        \centering
+
+        \vspace*{5mm}
+        \includegraphics[width=\linewidth]{image/MIPS_architecture}
+        \newline
+        \caption{Architettura MIPS - Pacchetto dei registri}
+        \vspace*{5mm}
+    \end{figure}
+
+    \noindent
+    \underline{\textbf{Nota bene}: Per tutti i registri laddove non c'è un
+    segnale di controllo vuol dire che a ogni colpo di clock} \\
+    \underline{caricano ciò che c'è al loro ingresso, se non sono
+    disabilitati (il PC e l'IR sono gli unici che possono essere} \\
+    \underline{disabilitati).}
+
+    \newpage
+\end{document}
